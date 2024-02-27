@@ -16,21 +16,21 @@ permissions:
 
 hooks:
   BeforeInstall:
-    - location: hooks/before-install.sh
+    - location: before-install.sh
       timeout: 100
       runas: ubuntu
 
   AfterInstall:
-    - location: hooks/after-install.sh
+    - location: after-install.sh
       timeout: 1000
       runas: ubuntu
 
   ApplicationStart:
-    - location: hooks/start-application.sh
+    - location: start-application.sh
       timeout: 300
       runas: ubuntu
 
   ValidateService:
-    - location: hooks/validate-service.sh
+    - location: validate-service.sh
       timeout: 100
       runas: ubuntu
