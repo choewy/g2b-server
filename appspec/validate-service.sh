@@ -17,17 +17,17 @@ do
   sleep 5s
 done
 
-if [ $boostrap == false ]; then
+if [ $bootstrap == false ]; then
   echo "fail bootstrap"
 
   exit 1
 fi
 
-# if [ -d "/home/ubuntu/g2b" ]; then
-#   rm -rf /home/ubuntu/g2b
-# fi
+if [ -d "/home/ubuntu/g2b" ]; then
+  rm -rf /home/ubuntu/g2b
+fi
 
-# sudo docker image prune -a --force
-# sudo docker container prune --force
+sudo docker image prune -a --force
+sudo docker container prune --force
 
 exit 0

@@ -10,8 +10,8 @@ fi
 image_id="$(sudo docker images --filter=reference=*/$image --format "{{.ID}}")"
 
 sudo docker run \
-  --name g2b -d
-  -p 7000:4000
+  --name g2b -d \
+  -p 7000:4000 \
   -v /home/ubuntu/logs:/var/g2b/logs \
   --network=net \
   --restart=always \
