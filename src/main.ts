@@ -1,9 +1,12 @@
 import cookieParser from 'cookie-parser';
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { ConfigFactory } from './config/config.factory';
 import { json, urlencoded } from 'express';
+
+import { NestFactory } from '@nestjs/core';
+import { IoAdapter } from '@nestjs/platform-socket.io';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+
+import { ConfigFactory } from './config/config.factory';
+import { AppModule } from './app.module';
 import { AppFilter } from './app.filter';
 
 async function bootstrap() {
@@ -20,6 +23,7 @@ async function bootstrap() {
   app.use(json());
   app.use(urlencoded({ extended: true }));
   app.use(cookieParser());
+  app.useWebSocketAdapter(new IoAdapter(app));
   app.enableCors(configFactory.corsOptions);
   app.useGlobalFilters(new AppFilter());
 
