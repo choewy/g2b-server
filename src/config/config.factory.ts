@@ -22,13 +22,14 @@ export class ConfigFactory {
     return {
       type: 'mysql',
       host: this.configService.get<string>('TYPEORM_HOST'),
-      port: this.configService.get<number>('TYPEORM_PORT'),
+      port: Number(this.configService.get<string>('TYPEORM_PORT')),
       username: this.configService.get<string>('TYPEORM_USERNAME'),
       password: this.configService.get<string>('TYPEORM_PASSWORD'),
       database: this.configService.get<string>('TYPEORM_DATABASE'),
       synchronize: this.isLocal,
       autoLoadEntities: true,
       entities: ['./dist/**/*.entity.js'],
+      logging: ['error', 'warn'],
     };
   }
 
