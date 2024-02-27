@@ -1,6 +1,7 @@
 import { Entity, JoinTable, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
-import { Keyword } from 'src/keyword/entity/keyword.entity';
+import { Keyword } from 'src/keyword/entities/keyword.entity';
+import { SearchState } from 'src/search/entities/search-state.entity';
 
 @Entity()
 export class User {
@@ -10,4 +11,8 @@ export class User {
   @OneToMany(() => Keyword, (e) => e.user, { cascade: true })
   @JoinTable()
   keywords: Keyword[];
+
+  @OneToMany(() => SearchState, (e) => e.user, { cascade: true })
+  @JoinTable()
+  searchStates: SearchState[];
 }
