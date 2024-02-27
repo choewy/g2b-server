@@ -1,13 +1,12 @@
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-
-import { AggregateRoot } from '@nestjs/cqrs';
+import { Column, CreateDateColumn, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 import { User } from 'src/user/entities/user.entity';
 
 import { SearchStateType } from './enums';
 
+@Index('search_state_idx_user_type', ['user.id', 'type'])
 @Entity()
-export class SearchState extends AggregateRoot {
+export class SearchState {
   @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
   readonly id: number;
 
