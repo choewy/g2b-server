@@ -36,7 +36,7 @@ export class BidsService {
       });
   }
 
-  async getItemsManyTimes(types: number[], startDate: string, endDate: string): Promise<Omit<BidResponesBody, 'pageNo' | 'numOfRows'>> {
+  async getItemsManyTimes(types: number[], startDate: string, endDate: string): Promise<BidItem[]> {
     const endPoints = this.getEndPoints(types);
 
     let totalCount = 0;
@@ -62,6 +62,6 @@ export class BidsService {
       } while (totalCount > currentCount);
     }
 
-    return { totalCount, items };
+    return items;
   }
 }

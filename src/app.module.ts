@@ -10,7 +10,7 @@ import { AppService } from './app.service';
 
 import { UserModule } from './user/user.module';
 import { KeywordModule } from './keyword/keyword.module';
-import { LambdaModule } from './lambda/lambda.module';
+import { SearchModule } from './search/search.module';
 
 @Module({
   imports: [
@@ -20,7 +20,7 @@ import { LambdaModule } from './lambda/lambda.module';
     JwtModule.forRoot(),
     UserModule,
     KeywordModule,
-    LambdaModule,
+    SearchModule,
   ],
   controllers: [AppController],
   providers: [AppService],

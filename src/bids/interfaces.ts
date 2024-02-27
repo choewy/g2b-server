@@ -19,7 +19,6 @@ export interface BidItem extends Readonly<Record<keyof typeof BidItemField, stri
   id: number;
   type: string;
   endPoint: BidEndPoint;
-  includeKeywords: string;
 }
 
 export interface BidResponesBody {
