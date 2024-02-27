@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { Keyword } from './entity/keyword.entity';
+import { Keyword } from './entities/keyword.entity';
 import { KeywordController } from './keyword.controller';
 import { GetKeywordsQueryHandler } from './queries/handlers/get-keywords.query.handler';
 import { CreateKeywordCommandHandler } from './commands/handler/create-keyword.command.handler';

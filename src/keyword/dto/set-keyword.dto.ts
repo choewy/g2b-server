@@ -1,6 +1,6 @@
 import { IsEnum, IsNotEmpty } from 'class-validator';
 
-import { KeywordType } from '../entity/enums';
+import { KeywordType } from '../entities/enums';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class SetKeywordDto {

@@ -4,7 +4,7 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
-import { Keyword } from 'src/keyword/entity/keyword.entity';
+import { Keyword } from 'src/keyword/entities/keyword.entity';
 import { KeywordIdDto } from 'src/keyword/dto/keyword-id.dto';
 
 import { DeleteKeywordCommand } from '../implements/delete-keyword.command';

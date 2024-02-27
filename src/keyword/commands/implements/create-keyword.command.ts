@@ -1,7 +1,7 @@
 import { plainToInstance } from 'class-transformer';
 
-import { KeywordType } from 'src/keyword/entity/enums';
-import { Keyword } from 'src/keyword/entity/keyword.entity';
+import { KeywordType } from 'src/keyword/entities/enums';
+import { Keyword } from 'src/keyword/entities/keyword.entity';
 
 export class CreateKeywordCommand {
   constructor(readonly userId: number, readonly type: KeywordType, readonly text: string) {}

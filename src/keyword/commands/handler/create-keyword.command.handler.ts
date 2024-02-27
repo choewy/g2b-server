@@ -4,7 +4,7 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 
-import { Keyword } from 'src/keyword/entity/keyword.entity';
+import { Keyword } from 'src/keyword/entities/keyword.entity';
 import { KeywordDto } from 'src/keyword/dto/keyword.dto';
 
 import { CreateKeywordCommand } from '../implements/create-keyword.command';

@@ -1,7 +1,7 @@
 import { ApiResponseProperty } from '@nestjs/swagger';
 
-import { KeywordType } from '../entity/enums';
-import { Keyword } from '../entity/keyword.entity';
+import { KeywordType } from '../entities/enums';
+import { Keyword } from '../entities/keyword.entity';
 
 export class KeywordDto {
   @ApiResponseProperty({ type: Number })

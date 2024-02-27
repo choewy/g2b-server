@@ -3,7 +3,7 @@ import { Repository } from 'typeorm';
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { InjectRepository } from '@nestjs/typeorm';
 
-import { Keyword } from 'src/keyword/entity/keyword.entity';
+import { Keyword } from 'src/keyword/entities/keyword.entity';
 import { KeywordDto } from 'src/keyword/dto/keyword.dto';
 
 import { GetKeywordsQuery } from '../implements/get-keywords.query';
