@@ -37,6 +37,10 @@ export class ConfigFactory {
     };
   }
 
+  get version(): string {
+    return this.configService.get('VERSION');
+  }
+
   get jwtSecret(): string {
     return this.configService.get<string>('JWT_SECRET');
   }

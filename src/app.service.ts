@@ -1,8 +1,12 @@
 import { Injectable } from '@nestjs/common';
 
+import { ConfigFactory } from './config/config.factory';
+
 @Injectable()
 export class AppService {
-  getHello(): string {
-    return 'Hello World!';
+  constructor(private readonly configFactory: ConfigFactory) {}
+
+  getVersion(): string {
+    return this.configFactory.version;
   }
 }
