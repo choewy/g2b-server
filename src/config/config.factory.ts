@@ -36,4 +36,16 @@ export class ConfigFactory {
   get jwtSecret(): string {
     return this.configService.get<string>('JWT_SECRET');
   }
+
+  get g2bApiOptions() {
+    const version = this.configService.get<string>('G2B_API_VERSION');
+    const url = this.configService.get<string>('G2B_API_URL');
+
+    return {
+      key: this.configService.get<string>('G2B_API_KEY'),
+      url: {
+        bid: `${url}/BidPublicInfoService${version}`,
+      },
+    };
+  }
 }
