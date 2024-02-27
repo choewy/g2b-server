@@ -1,3 +1,5 @@
+import { Settings } from 'luxon';
+
 import { Injectable } from '@nestjs/common';
 import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
 import { ConfigService } from '@nestjs/config';
@@ -5,7 +7,9 @@ import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 
 @Injectable()
 export class ConfigFactory {
-  constructor(private readonly configService: ConfigService) {}
+  constructor(private readonly configService: ConfigService) {
+    Settings.defaultZone = this.configService.get('TZ');
+  }
 
   get isLocal(): boolean {
     return this.configService.get<string>('NODE_ENV') === 'local';
