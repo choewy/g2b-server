@@ -55,7 +55,7 @@ jobs:
           registry: ${{ steps.ecr-login.outputs.registry }}
           repository: ${{ secrets.AWS_ECR_REPOSITORY }}
         run: |
-          docker build -t $repository:$tag .
+          docker build -t $registry/$repository:$tag .
           docker push $registry/$repository:$tag
 
   deploy:
