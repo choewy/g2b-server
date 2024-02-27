@@ -1,5 +1,8 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+
+import { JwtGuard } from 'src/jwt/jwt.guard';
+import { ReqUserID } from 'src/decorators/req-id.param';
 
 import { SearchStateType } from './entities/enums';
 import { SearchStateDto } from './dto/search-state.dto';
@@ -10,6 +13,7 @@ import { SearchBidsCommandHandler } from './commands/handlers/seach-bids.command
 import { SearchBidsCommand } from './commands/implements/search-bids.command';
 
 @ApiTags('검색')
+@UseGuards(JwtGuard)
 @Controller('search')
 export class SearchController {
   constructor(
@@ -20,21 +24,21 @@ export class SearchController {
   @Get('bids')
   @ApiOperation({ summary: '입찰공고 검색 상태 조회' })
   @ApiOkResponse({ type: SearchStateDto })
-  async getBidsSearchState() {
-    return this.getSearchStateQueryHandler.execute(new GetSearchStateQuery(0, SearchStateType.Bids));
+  async getBidsSearchState(@ReqUserID() userId: number) {
+    return this.getSearchStateQueryHandler.execute(new GetSearchStateQuery(userId, SearchStateType.Bids));
   }
 
   @Post('bids')
   @ApiOperation({ summary: '입찰공고 검색 실행' })
   @ApiCreatedResponse({ type: SearchStateDto })
-  async searchBids(@Body() body: SearchBidsParamsDto) {
-    return this.searchBidsCommandHandler.execute(new SearchBidsCommand(0, body));
+  async searchBids(@ReqUserID() userId: number, @Body() body: SearchBidsParamsDto) {
+    return this.searchBidsCommandHandler.execute(new SearchBidsCommand(userId, body));
   }
 
   @Get('hrcs')
   @ApiOperation({ summary: '사전규격 검색 상태 조회' })
   @ApiOkResponse({ type: SearchStateDto })
-  async getHrcsSearchState() {
-    return this.getSearchStateQueryHandler.execute(new GetSearchStateQuery(0, SearchStateType.Bids));
+  async getHrcsSearchState(@ReqUserID() userId: number) {
+    return this.getSearchStateQueryHandler.execute(new GetSearchStateQuery(userId, SearchStateType.Bids));
   }
 }
