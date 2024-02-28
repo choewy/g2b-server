@@ -5,7 +5,7 @@ export class HrcsError extends Error {
     super();
 
     this.name = HrcsError.name;
-    this.message = '사전규격 공고를 불러올 수 없습니다.';
+    this.message = '사전규격을 불러올 수 없습니다.';
     this.cause = e;
 
     if (e instanceof Error) {

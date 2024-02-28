@@ -40,14 +40,14 @@ export class SearchController {
   }
 
   @Get('hrcs')
-  @ApiOperation({ summary: '사전규격 공고 검색 상태 조회' })
+  @ApiOperation({ summary: '사전규격 검색 상태 조회' })
   @ApiOkResponse({ type: SearchStateDto })
   async getHrcsSearchState(@ReqUserID() userId: number) {
     return this.getSearchStateQueryHandler.execute(new GetSearchStateQuery(userId, SearchStateType.Bids));
   }
 
   @Post('hrcs')
-  @ApiOperation({ summary: '사전규격 공고 검색 시작' })
+  @ApiOperation({ summary: '사전규격 검색 시작' })
   @ApiCreatedResponse({ type: SearchStateDto })
   async searchHrcs(@ReqUserID() userId: number, @Body() body: SearchHrcsParamsDto) {
     return this.searchHrcsCommandHandler.execute(new SearchHrcsCommand(userId, body));
