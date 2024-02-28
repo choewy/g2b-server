@@ -52,7 +52,8 @@ export class ConfigFactory {
     return {
       key: this.configService.get<string>('G2B_API_KEY'),
       url: {
-        bid: `${url}/BidPublicInfoService${version}`,
+        bids: `${url}/BidPublicInfoService${version}`,
+        hrcs: `${url}/HrcspSsstndrdInfoService`,
       },
     };
   }
