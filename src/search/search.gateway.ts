@@ -44,7 +44,7 @@ export class SearchGateway implements OnGatewayConnection {
   }
 
   sendCount(searchId: number, count: number): void {
-    this.server.in(this.createRoomName(searchId)).emit('count', { count });
+    this.server.in(this.createRoomName(searchId)).emit('count', count);
   }
 
   sendExcelFile(searchId: number, excelFile: UploadedExcelFileDto): void {

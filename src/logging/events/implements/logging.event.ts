@@ -12,18 +12,6 @@ export class LoggingEvent {
     this.logger = new Logger(context);
   }
 
-  toJSONString() {
-    return JSON.stringify(
-      {
-        context: this.context,
-        message: this.message,
-        ...this.params,
-      },
-      null,
-      2,
-    );
-  }
-
   toObject() {
     return {
       context: this.context,

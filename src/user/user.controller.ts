@@ -1,10 +1,11 @@
 import { Response } from 'express';
 
 import { Body, Controller, Get, Post, Res, UseGuards } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { JwtGuard } from 'src/jwt/jwt.guard';
 import { ReqUserID } from 'src/decorators/req-id.param';
+import { JwtService } from 'src/jwt/jwt.service';
 
 import { GetUserWithAuthQueryHandler } from './queries/handlers/get-user-with-auth.query.handler';
 import { GetUserWithAuthQuery } from './queries/implements/get-user-with-auth.query';
@@ -14,6 +15,7 @@ import { CreateUserCommandHandler } from './commands/handlers/create-user.comman
 import { CreateUserCommand } from './commands/implements/create-user.command';
 import { SignInDto } from './dto/sign-in.dto';
 import { SignUpDto } from './dto/sign-up.dto';
+import { UserDto } from './dto/user.dto';
 
 @ApiTags('사용자')
 @Controller('users')
@@ -22,11 +24,13 @@ export class UserController {
     private readonly getUserWithAuthQueryHandler: GetUserWithAuthQueryHandler,
     private readonly getUserWithSignInQueryHandler: GetUserWithSignInQueryHandler,
     private readonly createUserCommandHandler: CreateUserCommandHandler,
+    private readonly jwtService: JwtService,
   ) {}
 
   @Get('auth')
   @UseGuards(JwtGuard)
   @ApiOperation({ summary: '인가' })
+  @ApiOkResponse({ type: UserDto })
   async auth(@Res({ passthrough: true }) res: Response, @ReqUserID() userId: number) {
     return this.getUserWithAuthQueryHandler.execute(new GetUserWithAuthQuery(res, userId));
   }
@@ -41,5 +45,11 @@ export class UserController {
   @ApiOperation({ summary: '회원가입' })
   async signUp(@Res({ passthrough: true }) res: Response, @Body() body: SignUpDto) {
     return this.createUserCommandHandler.execute(new CreateUserCommand(res, body));
+  }
+
+  @Post('signout')
+  @ApiOperation({ summary: '로그아웃' })
+  async signOut(@Res({ passthrough: true }) res: Response) {
+    return this.jwtService.deleteTokens(res);
   }
 }
