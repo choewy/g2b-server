@@ -1,9 +1,11 @@
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
-import { UploadedExcelFileType } from './enums';
 import { User } from 'src/user/entities/user.entity';
 
+import { UploadedExcelFileType } from './enums';
+
 @Entity()
+@Index('uploaded_excel_file_idx_user_type', ['user.id', 'type'])
 export class UploadedExcelFile {
   @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
   readonly id: number;
