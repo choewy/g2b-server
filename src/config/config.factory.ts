@@ -5,6 +5,7 @@ import { Injectable } from '@nestjs/common';
 import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
 import { ConfigService } from '@nestjs/config';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
+import { S3ClientConfig } from '@aws-sdk/client-s3';
 
 @Injectable()
 export class ConfigFactory {
@@ -18,8 +19,16 @@ export class ConfigFactory {
     return this.PROCESS_ID;
   }
 
+  get nodeEnv() {
+    return this.configService.get<string>('NODE_ENV');
+  }
+
   get isLocal(): boolean {
-    return this.configService.get<string>('NODE_ENV') === 'local';
+    return this.nodeEnv === 'local';
+  }
+
+  get isProduct(): boolean {
+    return this.nodeEnv === 'product';
   }
 
   get corsOptions(): CorsOptions {
@@ -63,5 +72,19 @@ export class ConfigFactory {
         hrcs: `${url}/HrcspSsstndrdInfoService`,
       },
     };
+  }
+
+  get awsClientCredentials(): S3ClientConfig {
+    return {
+      region: this.configService.get<string>('AWS_REGION'),
+      credentials: {
+        accessKeyId: this.configService.get<string>('AWS_ACCESS_KEY_ID'),
+        secretAccessKey: this.configService.get<string>('AWS_SECRET_ACCESS_KEY'),
+      },
+    };
+  }
+
+  get awsS3Bucket(): string {
+    return this.configService.get<string>('AWS_S3_BUCKET');
   }
 }
