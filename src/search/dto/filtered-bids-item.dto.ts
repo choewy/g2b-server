@@ -21,7 +21,7 @@ export class FilteredBidsItemDto implements Omit<BidsItem, 'endPoint'> {
     this.type = endPoint.name;
   }
 
-  setKeywords(keywords: string[]): void {
-    this.keywords = keywords.shift() ?? '';
+  setKeywords(keywords: RegExpExecArray): void {
+    this.keywords = keywords.shift()[0] ?? '';
   }
 }

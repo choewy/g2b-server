@@ -40,7 +40,7 @@ export class SearchService {
       if (regExp.include) {
         const keywords = regExp.include.exec(item.bidNtceNm);
 
-        if (keywords.length === 0) {
+        if (keywords === null) {
           continue;
         }
 
@@ -49,9 +49,9 @@ export class SearchService {
 
       if (regExp.exclude) {
         const keywords = []
-          .concat(regExp.exclude.exec(item.bidNtceNm))
-          .concat(regExp.exclude.exec(item.ntceInsttNm))
-          .concat(regExp.exclude.exec(item.dminsttNm));
+          .concat(regExp.exclude.exec(item.bidNtceNm) ?? [])
+          .concat(regExp.exclude.exec(item.ntceInsttNm) ?? [])
+          .concat(regExp.exclude.exec(item.dminsttNm) ?? []);
 
         if (keywords.length > 0) {
           continue;
@@ -75,7 +75,7 @@ export class SearchService {
       if (regExp.include) {
         const keywords = regExp.include.exec(item.prdctClsfcNoNm);
 
-        if (keywords.length === 0) {
+        if (keywords === null) {
           continue;
         }
 
@@ -83,7 +83,7 @@ export class SearchService {
       }
 
       if (regExp.exclude) {
-        const keywords = [].concat(regExp.exclude.exec(item.prdctClsfcNoNm)).concat(regExp.exclude.exec(item.rlDminsttNm));
+        const keywords = [].concat(regExp.exclude.exec(item.prdctClsfcNoNm) ?? []).concat(regExp.exclude.exec(item.rlDminsttNm) ?? []);
 
         if (keywords.length > 0) {
           continue;

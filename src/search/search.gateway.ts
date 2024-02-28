@@ -5,7 +5,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { OnGatewayConnection, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 
 import { SearchState } from './entities/search-state.entity';
-import { FilteredBidsItemDto } from './dto/filtered-bids-item.dto';
 
 @WebSocketGateway({
   namespace: 'search',
@@ -42,8 +41,8 @@ export class SearchGateway implements OnGatewayConnection {
     return ['search', searchId].join(':');
   }
 
-  sendComplete(searchId: number, filteredItems: FilteredBidsItemDto[]): void {
-    this.server.in(this.createRoomName(searchId)).emit('complete', filteredItems);
+  sendComplete(searchId: number, base64Url: string): void {
+    this.server.in(this.createRoomName(searchId)).emit('complete', base64Url);
 
     setTimeout(() => {
       this.server.in(this.createRoomName(searchId)).disconnectSockets(true);

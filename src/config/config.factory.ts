@@ -1,3 +1,4 @@
+import { v4 } from 'uuid';
 import { Settings } from 'luxon';
 
 import { Injectable } from '@nestjs/common';
@@ -7,8 +8,14 @@ import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 
 @Injectable()
 export class ConfigFactory {
+  private readonly PROCESS_ID = v4();
+
   constructor(private readonly configService: ConfigService) {
     Settings.defaultZone = this.configService.get('TZ');
+  }
+
+  get processId(): string {
+    return this.PROCESS_ID;
   }
 
   get isLocal(): boolean {

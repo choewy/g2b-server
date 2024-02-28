@@ -13,6 +13,10 @@ export class SearchState {
   @Column({ type: 'varchar', length: 10 })
   type: SearchStateType;
 
+  @Index('search_state_idx_process_id')
+  @Column({ type: 'varchar', length: 50 })
+  processId: string;
+
   @CreateDateColumn()
   readonly startedAt: Date;
 
