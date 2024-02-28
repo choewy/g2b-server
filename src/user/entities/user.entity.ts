@@ -2,6 +2,7 @@ import { Column, Entity, JoinTable, OneToMany, PrimaryGeneratedColumn } from 'ty
 
 import { Keyword } from 'src/keyword/entities/keyword.entity';
 import { SearchState } from 'src/search/entities/search-state.entity';
+import { UploadedExcelFile } from 'src/file/entities/uploaded-excel-file.entity';
 
 @Entity()
 export class User {
@@ -24,4 +25,8 @@ export class User {
   @OneToMany(() => SearchState, (e) => e.user, { cascade: true })
   @JoinTable()
   searchStates: SearchState[];
+
+  @OneToMany(() => UploadedExcelFile, (e) => e.user, { cascade: true })
+  @JoinTable()
+  uploadedExcelFiles: UploadedExcelFile[];
 }

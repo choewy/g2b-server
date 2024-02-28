@@ -8,11 +8,12 @@ import { JwtModule } from './jwt/jwt.module';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { AppFilter } from './app.filter';
 
+import { FileModule } from './file/file.module';
 import { UserModule } from './user/user.module';
 import { KeywordModule } from './keyword/keyword.module';
 import { SearchModule } from './search/search.module';
-import { AppFilter } from './app.filter';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { AppFilter } from './app.filter';
     ConfigModule.forRoot(),
     DatabaseModule.forRoot(),
     JwtModule.forRoot(),
+    FileModule,
     UserModule,
     KeywordModule,
     SearchModule,
