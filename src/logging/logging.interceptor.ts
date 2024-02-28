@@ -1,16 +1,16 @@
 import { tap } from 'rxjs';
 import { Request, Response } from 'express';
 
-import { EventBus } from '@nestjs/cqrs';
 import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nestjs/common';
 
-import { HttpLogEvent } from './events/implements/http-log-event';
+import { LoggingService } from './logging.service';
 
 @Injectable()
 export class LoggingInterceptor implements NestInterceptor {
-  constructor(private readonly eventBus: EventBus) {}
+  constructor(private readonly loggingService: LoggingService) {}
 
   intercept(context: ExecutionContext, next: CallHandler) {
+    context.switchToHttp().getRequest().requestTime = Date.now();
     context.switchToHttp().getRequest().context = {
       class: context.getClass()?.name,
       handler: context.getHandler()?.name,
@@ -22,7 +22,7 @@ export class LoggingInterceptor implements NestInterceptor {
         const req = http.getRequest<Request>();
         const res = http.getResponse<Response>();
 
-        this.eventBus.publish(new HttpLogEvent(req, res));
+        this.loggingService.create('HTTP').http(req, res);
       }),
     );
   }

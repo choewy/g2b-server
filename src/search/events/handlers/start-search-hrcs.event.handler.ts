@@ -7,31 +7,31 @@ import { LoggingService } from 'src/logging/logging.service';
 import { SearchState } from 'src/search/entities/search-state.entity';
 import { SearchService } from 'src/search/search.service';
 import { SearchGateway } from 'src/search/search.gateway';
-import { BidsService } from 'src/bids/bids.service';
+import { HrcsService } from 'src/hrcs/hrcs.service';
 
-import { StartSearchBidsEvent } from '../implements/start-search-bids.event';
+import { StartSearchHrcsEvent } from '../implements/start-search-hrcs.event';
 
-@EventsHandler(StartSearchBidsEvent)
-export class StartSearchBidsEventHandler implements IEventHandler<StartSearchBidsEvent> {
+@EventsHandler(StartSearchHrcsEvent)
+export class StartSearchHrcsEventHandler implements IEventHandler<StartSearchHrcsEvent> {
   constructor(
     @InjectRepository(SearchState)
     private readonly searchStateRepository: Repository<SearchState>,
     private readonly searchService: SearchService,
     private readonly searchGateway: SearchGateway,
-    private readonly bidsService: BidsService,
+    private readonly hrcsService: HrcsService,
     private readonly loggingService: LoggingService,
   ) {}
 
-  async handle(event: StartSearchBidsEvent): Promise<void> {
+  async handle(event: StartSearchHrcsEvent): Promise<void> {
     const { userId, searchId, params } = event;
 
-    const logging = this.loggingService.create(StartSearchBidsEvent.name);
+    const logging = this.loggingService.create(StartSearchHrcsEvent.name);
 
     try {
       const { types, startDate, endDate } = params;
 
-      const items = await this.bidsService.getItemsManyTimes(types, startDate, endDate);
-      const filteredItems = await this.searchService.filterBidsItems(userId, items);
+      const items = await this.hrcsService.getItemsManyTimes(types, startDate, endDate);
+      const filteredItems = await this.searchService.filterHrcsItems(userId, items);
 
       this.searchGateway.sendComplete(searchId, '');
 

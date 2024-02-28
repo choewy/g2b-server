@@ -9,6 +9,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ConfigFactory } from './config/config.factory';
 import { AppModule } from './app.module';
 import { AppFilter } from './app.filter';
+import { LoggingInterceptor } from './logging/logging.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -24,10 +25,12 @@ async function bootstrap() {
   app.use(json());
   app.use(urlencoded({ extended: true }));
   app.use(cookieParser());
+  app.enableShutdownHooks();
   app.useWebSocketAdapter(new IoAdapter(app));
   app.enableCors(configFactory.corsOptions);
-  app.useGlobalFilters(new AppFilter());
+  app.useGlobalFilters(app.get(AppFilter));
   app.useGlobalInterceptors(
+    app.get(LoggingInterceptor),
     new ClassSerializerInterceptor(new Reflector(), {
       enableCircularCheck: true,
       enableImplicitConversion: true,

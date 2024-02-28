@@ -1,20 +1,26 @@
-import { Response } from 'express';
+import { Request, Response } from 'express';
 
 import { ArgumentsHost, Catch, ExceptionFilter, HttpException, InternalServerErrorException } from '@nestjs/common';
 
+import { LoggingService } from './logging/logging.service';
+
 @Catch(HttpException, Error)
 export class AppFilter implements ExceptionFilter {
+  constructor(private readonly loggingService: LoggingService) {}
+
   catch(e: HttpException | Error, host: ArgumentsHost) {
     let exception = e as HttpException;
 
     if (exception instanceof HttpException === false) {
-      exception = new InternalServerErrorException('서버 오류가 발생하였습니다.', { cause: e });
+      exception = new InternalServerErrorException(e);
     }
 
-    return host.switchToHttp().getResponse<Response>().status(exception.getStatus()).send({
-      message: exception.message,
-      statusCode: exception.getStatus(),
-      cause: exception.cause,
-    });
+    const http = host.switchToHttp();
+    const req = http.getRequest<Request>();
+    const res = http.getResponse<Response>();
+
+    this.loggingService.create('Exception').http(req, res, exception);
+
+    return res.status(exception.getStatus()).send(exception.getResponse());
   }
 }
