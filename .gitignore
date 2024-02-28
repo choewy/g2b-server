@@ -1,5 +1,7 @@
 .env
 
+/temp
+
 # compiled output
 /dist
 /node_modules

@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { Keyword } from 'src/keyword/entities/keyword.entity';
 import { BidsModule } from 'src/bids/bids.module';
+import { HrcsModule } from 'src/hrcs/hrcs.module';
 
 import { SearchController } from './search.controller';
 import { SearchState } from './entities/search-state.entity';
@@ -17,7 +18,7 @@ const QueryHandlers = [GetSearchStateQueryHandler];
 const EventHandlers = [StartSearchBidsEventHandler];
 
 @Module({
-  imports: [TypeOrmModule.forFeature([SearchState, Keyword]), BidsModule],
+  imports: [TypeOrmModule.forFeature([SearchState, Keyword]), BidsModule, HrcsModule],
   controllers: [SearchController],
   providers: [SearchGateway, SearchService, ...CommandHandlers, ...QueryHandlers, ...EventHandlers],
 })
