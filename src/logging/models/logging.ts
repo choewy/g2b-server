@@ -88,7 +88,7 @@ export class Logging extends AggregateRoot {
       params.statusCode = res.statusCode;
     }
 
-    this.apply(new LoggingEvent(exception ? 'warn' : 'verbose', this.context, undefined, params));
+    this.apply(new LoggingEvent(exception ? 'warn' : 'verbose', this.context, exception ? 'exception' : 'http', params));
     this.commit();
   }
 }

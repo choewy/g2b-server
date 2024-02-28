@@ -11,10 +11,9 @@ export class LoggingInterceptor implements NestInterceptor {
 
   intercept(context: ExecutionContext, next: CallHandler) {
     context.switchToHttp().getRequest().requestTime = Date.now();
-    context.switchToHttp().getRequest().context = {
-      class: context.getClass()?.name,
-      handler: context.getHandler()?.name,
-    };
+    context.switchToHttp().getRequest().context = [context.getClass()?.name, context.getHandler()?.name]
+      .filter((context) => context)
+      .join('.');
 
     return next.handle().pipe(
       tap(() => {

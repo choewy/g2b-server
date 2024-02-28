@@ -5,7 +5,7 @@ export class LoggingEvent {
 
   constructor(
     readonly level: keyof Pick<Logger, 'verbose' | 'debug' | 'warn' | 'error'>,
-    readonly context: string,
+    readonly context?: string,
     readonly message?: string,
     readonly params?: object,
   ) {
@@ -22,5 +22,13 @@ export class LoggingEvent {
       null,
       2,
     );
+  }
+
+  toObject() {
+    return {
+      context: this.context,
+      message: this.message,
+      ...this.params,
+    };
   }
 }
