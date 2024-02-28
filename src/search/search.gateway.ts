@@ -4,6 +4,8 @@ import { Namespace, Socket } from 'socket.io';
 import { InjectRepository } from '@nestjs/typeorm';
 import { OnGatewayConnection, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 
+import { UploadedExcelFileDto } from 'src/file/dto/uploaded-excel-file.dto';
+
 import { SearchState } from './entities/search-state.entity';
 
 @WebSocketGateway({
@@ -41,8 +43,12 @@ export class SearchGateway implements OnGatewayConnection {
     return ['search', searchId].join(':');
   }
 
-  sendComplete(searchId: number, base64Url: string): void {
-    this.server.in(this.createRoomName(searchId)).emit('complete', base64Url);
+  sendCount(searchId: number, count: number): void {
+    this.server.in(this.createRoomName(searchId)).emit('count', { count });
+  }
+
+  sendExcelFile(searchId: number, excelFile: UploadedExcelFileDto): void {
+    this.server.in(this.createRoomName(searchId)).emit('excel-file', excelFile);
 
     setTimeout(() => {
       this.server.in(this.createRoomName(searchId)).disconnectSockets(true);
