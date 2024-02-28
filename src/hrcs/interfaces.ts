@@ -19,7 +19,7 @@ export interface HrcsItem extends Readonly<Record<keyof typeof HrcsItemField, st
   endPoint: HrcsEndPoint;
 }
 
-export interface HrcsResponesBody {
+export interface HrcsResponseBody {
   pageNo: number;
   numOfRows: number;
   totalCount: number;
@@ -27,5 +27,5 @@ export interface HrcsResponesBody {
 }
 
 export interface HrcsResponse {
-  response: { body: HrcsResponesBody };
+  response: { body: HrcsResponseBody };
 }

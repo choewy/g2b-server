@@ -1,4 +1,4 @@
-export const BidItemField = {
+export const BidsItemField = {
   bidNtceNo: '입찰공고번호',
   bidNtceDtlUrl: '입찰공고URL',
   bidNtceNm: '입찰공고명',
@@ -10,24 +10,24 @@ export const BidItemField = {
   bidClseDt: '입찰마감일시',
 } as const;
 
-export interface BidEndPoint {
+export interface BidsEndPoint {
   name: string;
   path: string;
 }
 
-export interface BidItem extends Readonly<Record<keyof typeof BidItemField, string>> {
+export interface BidsItem extends Readonly<Record<keyof typeof BidsItemField, string>> {
   id: number;
   type: string;
-  endPoint: BidEndPoint;
+  endPoint: BidsEndPoint;
 }
 
-export interface BidResponesBody {
+export interface BidsResponseBody {
   pageNo: number;
   numOfRows: number;
   totalCount: number;
-  items: BidItem[];
+  items: BidsItem[];
 }
 
-export interface BidResponse {
-  response: { body: BidResponesBody };
+export interface BidsResponse {
+  response: { body: BidsResponseBody };
 }

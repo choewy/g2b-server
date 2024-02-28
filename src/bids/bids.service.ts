@@ -5,7 +5,7 @@ import { HttpService } from '@nestjs/axios';
 
 import { ConfigFactory } from 'src/config/config.factory';
 
-import { BidEndPoint, BidItem, BidResponesBody, BidResponse } from './interfaces';
+import { BidsEndPoint, BidsItem, BidsResponseBody, BidsResponse } from './interfaces';
 import { BidsParamsDto } from './dto/bids-params.dto';
 import { BidsError } from './bids.error';
 
@@ -13,8 +13,8 @@ import { BidsError } from './bids.error';
 export class BidsService {
   constructor(private readonly httpService: HttpService, private readonly configFactory: ConfigFactory) {}
 
-  private getEndPoints(types: number[]): BidEndPoint[] {
-    const endPoints: BidEndPoint[] = [
+  private getEndPoints(types: number[]): BidsEndPoint[] {
+    const endPoints: BidsEndPoint[] = [
       { name: '물품', path: 'getBidPblancListInfoThngPPSSrch01' },
       { name: '공사', path: 'getBidPblancListInfoCnstwkPPSSrch01' },
       { name: '용역', path: 'getBidPblancListInfoServcPPSSrch01' },
@@ -25,24 +25,24 @@ export class BidsService {
     return types.length === 0 ? endPoints : endPoints.filter((_, i) => types.includes(i));
   }
 
-  async getItemsOnce(endPoint: BidEndPoint, params: BidsParamsDto): Promise<BidResponesBody> {
+  async getItemsOnce(endPoint: BidsEndPoint, params: BidsParamsDto): Promise<BidsResponseBody> {
     const options = this.configFactory.g2bApiOptions;
     const url = [options.url, endPoint.path].join('/');
 
-    return lastValueFrom(this.httpService.get<BidResponse>(url, { params }))
+    return lastValueFrom(this.httpService.get<BidsResponse>(url, { params }))
       .then((res) => res.data.response.body)
       .catch((e) => {
         throw new BidsError(e);
       });
   }
 
-  async getItemsManyTimes(types: number[], startDate: string, endDate: string): Promise<BidItem[]> {
+  async getItemsManyTimes(types: number[], startDate: string, endDate: string): Promise<BidsItem[]> {
     const endPoints = this.getEndPoints(types);
 
     let totalCount = 0;
     let currentCount = 0;
 
-    const items: BidItem[] = [];
+    const items: BidsItem[] = [];
 
     for (const endPoint of endPoints) {
       const options = this.configFactory.g2bApiOptions;

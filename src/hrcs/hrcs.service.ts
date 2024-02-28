@@ -5,7 +5,7 @@ import { Injectable } from '@nestjs/common';
 
 import { ConfigFactory } from 'src/config/config.factory';
 
-import { HrcsEndPoint, HrcsItem, HrcsResponesBody, HrcsResponse } from './interfaces';
+import { HrcsEndPoint, HrcsItem, HrcsResponseBody, HrcsResponse } from './interfaces';
 import { HrcsParamsDto } from './dto/hrcs-params.dto';
 import { HrcsError } from './hrcs.error';
 
@@ -24,7 +24,7 @@ export class HrcsService {
     return types.length === 0 ? endPoints : endPoints.filter((_, i) => types.includes(i));
   }
 
-  async getItemsOnce(endPoint: HrcsEndPoint, params: HrcsParamsDto): Promise<HrcsResponesBody> {
+  async getItemsOnce(endPoint: HrcsEndPoint, params: HrcsParamsDto): Promise<HrcsResponseBody> {
     const options = this.configFactory.g2bApiOptions;
     const url = [options.url, endPoint.path].join('/');
 

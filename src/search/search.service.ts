@@ -4,7 +4,7 @@ import { Injectable } from '@nestjs/common';
 
 import { InjectRepository } from '@nestjs/typeorm';
 
-import { BidItem } from 'src/bids/interfaces';
+import { BidsItem } from 'src/bids/interfaces';
 import { Keyword } from 'src/keyword/entities/keyword.entity';
 
 import { FilteredBidsItemDto } from './dto/filtered-bid-item.dto';
@@ -27,7 +27,7 @@ export class SearchService {
     return { include: includeKeywordRegExp, exclude: excludeKeywordRegExp };
   }
 
-  async filterBidsItems(userId: number, items: BidItem[]): Promise<FilteredBidsItemDto[]> {
+  async filterBidsItems(userId: number, items: BidsItem[]): Promise<FilteredBidsItemDto[]> {
     const regExp = await this.createKeywordRegExpMap(userId);
 
     const filteredItems: FilteredBidsItemDto[] = [];

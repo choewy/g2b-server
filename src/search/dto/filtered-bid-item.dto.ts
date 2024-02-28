@@ -1,6 +1,6 @@
-import { BidItem } from 'src/bids/interfaces';
+import { BidsItem } from 'src/bids/interfaces';
 
-export class FilteredBidsItemDto implements Omit<BidItem, 'endPoint'> {
+export class FilteredBidsItemDto implements Omit<BidsItem, 'endPoint'> {
   id: number;
   type: string;
   keywords: string;
@@ -14,7 +14,7 @@ export class FilteredBidsItemDto implements Omit<BidItem, 'endPoint'> {
   bidNtceDt: string;
   bidClseDt: string;
 
-  constructor(i: number, { endPoint, ...item }: BidItem) {
+  constructor(i: number, { endPoint, ...item }: BidsItem) {
     Object.assign(this, item);
 
     this.id = i + 1;
