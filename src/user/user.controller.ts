@@ -34,12 +34,12 @@ export class UserController {
   @Post('signin')
   @ApiOperation({ summary: '로그인' })
   async signIn(@Res({ passthrough: true }) res: Response, @Body() body: SignInDto) {
-    return this.getUserWithSignInQueryHandler.execute(new GetUserWithSignInQuery(res, body.email, body.password));
+    return this.getUserWithSignInQueryHandler.execute(new GetUserWithSignInQuery(res, body));
   }
 
   @Post('signup')
   @ApiOperation({ summary: '회원가입' })
   async signUp(@Res({ passthrough: true }) res: Response, @Body() body: SignUpDto) {
-    return this.createUserCommandHandler.execute(new CreateUserCommand(res, body.email, body.name, body.password, body.confirmPassword));
+    return this.createUserCommandHandler.execute(new CreateUserCommand(res, body));
   }
 }

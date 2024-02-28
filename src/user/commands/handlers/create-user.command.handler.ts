@@ -18,13 +18,13 @@ export class CreateUserCommandHandler implements ICommandHandler<CreateUserComma
   ) {}
 
   async execute(command: CreateUserCommand): Promise<void> {
-    const exist = await this.userRepository.existsBy({ email: command.email });
+    const exist = await this.userRepository.existsBy({ email: command.body.email });
 
     if (exist) {
       throw new ConflictException('이미 가입된 계정입니다.');
     }
 
-    if (command.password !== command.confirmPassword) {
+    if (command.body.password !== command.body.confirmPassword) {
       throw new BadRequestException('비밀번호가 같지 않습니다.');
     }
 

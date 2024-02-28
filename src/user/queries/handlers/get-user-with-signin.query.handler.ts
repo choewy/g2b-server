@@ -19,7 +19,7 @@ export class GetUserWithSignInQueryHandler implements IQueryHandler<GetUserWithS
   ) {}
 
   async execute(query: GetUserWithSignInQuery): Promise<void> {
-    const user = await this.userRepository.findOneBy({ email: query.email });
+    const user = await this.userRepository.findOneBy({ email: query.body.email });
 
     if (user == null) {
       this.jwtService.deleteTokens(query.res);
@@ -27,7 +27,7 @@ export class GetUserWithSignInQueryHandler implements IQueryHandler<GetUserWithS
       throw new UnauthorizedException('계정 정보를 찾을 수 없습니다.');
     }
 
-    if (compareSync(query.password, user.password) === false) {
+    if (compareSync(query.body.password, user.password) === false) {
       throw new UnauthorizedException('이메일 또는 비밀번호를 확인하세요.');
     }
 
