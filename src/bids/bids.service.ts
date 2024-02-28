@@ -27,7 +27,7 @@ export class BidsService {
 
   async getItemsOnce(endPoint: BidsEndPoint, params: BidsParamsDto): Promise<BidsResponseBody> {
     const options = this.configFactory.g2bApiOptions;
-    const url = [options.url, endPoint.path].join('/');
+    const url = [options.url.bids, endPoint.path].join('/');
 
     return lastValueFrom(this.httpService.get<BidsResponse>(url, { params }))
       .then((res) => res.data.response.body)

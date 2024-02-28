@@ -26,7 +26,7 @@ export class HrcsService {
 
   async getItemsOnce(endPoint: HrcsEndPoint, params: HrcsParamsDto): Promise<HrcsResponseBody> {
     const options = this.configFactory.g2bApiOptions;
-    const url = [options.url, endPoint.path].join('/');
+    const url = [options.url.hrcs, endPoint.path].join('/');
 
     return lastValueFrom(this.httpService.get<HrcsResponse>(url, { params }))
       .then((res) => res.data.response.body)
