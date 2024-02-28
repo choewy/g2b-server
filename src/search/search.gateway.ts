@@ -5,7 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { OnGatewayConnection, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 
 import { SearchState } from './entities/search-state.entity';
-import { FilteredBidsItemDto } from './dto/filtered-bid-item.dto';
+import { FilteredBidsItemDto } from './dto/filtered-bids-item.dto';
 
 @WebSocketGateway({
   namespace: 'search',

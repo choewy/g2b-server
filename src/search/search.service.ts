@@ -4,11 +4,13 @@ import { Injectable } from '@nestjs/common';
 
 import { InjectRepository } from '@nestjs/typeorm';
 
-import { BidsItem } from 'src/bids/interfaces';
 import { Keyword } from 'src/keyword/entities/keyword.entity';
-
-import { FilteredBidsItemDto } from './dto/filtered-bid-item.dto';
 import { KeywordType } from 'src/keyword/entities/enums';
+import { BidsItem } from 'src/bids/interfaces';
+import { HrcsItem } from 'src/hrcs/interfaces';
+
+import { FilteredBidsItemDto } from './dto/filtered-bids-item.dto';
+import { FilteredHrcsItemDto } from './dto/filtered-hrcs-item.dto';
 
 @Injectable()
 export class SearchService {
@@ -62,10 +64,34 @@ export class SearchService {
     return filteredItems;
   }
 
-  async filterHrcsItems(userId: number, items: unknown[]) {
+  async filterHrcsItems(userId: number, items: HrcsItem[]): Promise<FilteredHrcsItemDto[]> {
     const regExp = await this.createKeywordRegExpMap(userId);
 
-    const filteredItems: FilteredBidsItemDto[] = [];
+    const filteredItems: FilteredHrcsItemDto[] = [];
+
+    while (items.length > 0) {
+      const item = new FilteredHrcsItemDto(filteredItems.length, items.shift());
+
+      if (regExp.include) {
+        const keywords = regExp.include.exec(item.prdctClsfcNoNm);
+
+        if (keywords.length === 0) {
+          continue;
+        }
+
+        item.setKeywords(keywords);
+      }
+
+      if (regExp.exclude) {
+        const keywords = [].concat(regExp.exclude.exec(item.prdctClsfcNoNm)).concat(regExp.exclude.exec(item.rlDminsttNm));
+
+        if (keywords.length > 0) {
+          continue;
+        }
+      }
+
+      filteredItems.push(item);
+    }
 
     return filteredItems;
   }

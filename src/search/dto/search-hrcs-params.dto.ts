@@ -2,13 +2,13 @@ import { IsArray, IsDateString, IsInt, IsNotEmpty, Max, Min } from 'class-valida
 
 import { ApiProperty } from '@nestjs/swagger';
 
-export class SearchBidsParamsDto {
+export class SearchHrcsParamsDto {
   @ApiProperty({ type: [Number] })
   @IsNotEmpty()
   @IsArray()
   @IsInt({ each: true })
   @Min(0, { each: true })
-  @Max(4, { each: true })
+  @Max(3, { each: true })
   types: number[];
 
   @ApiProperty({ type: String, format: 'date' })
