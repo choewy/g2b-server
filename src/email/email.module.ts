@@ -11,10 +11,12 @@ import { SendVerifyEmailCommandHandler } from './commands/handlers/send-verify-e
 import { SendResetPasswordEmailCommandHandler } from './commands/handlers/send-reset-password-email.command.handler';
 import { SendSignupEmailEventHandler } from './events/handlers/send-signup-email.event.handler';
 import { ResetPasswordEmailVerification } from './entities/reset-password-email-verification.entity';
+import { SendVerifyEmailEventHandler } from './events/handlers/send-verify-email.event.handler';
+import { SendResetPasswordEmailEventHandler } from './events/handlers/send-reset-password-email.event.handler';
 
 const QueryHandlers = [GetVerifyEmailRemainSecondsQueryHandler];
 const CommandHandlers = [SendVerifyEmailCommandHandler, SendResetPasswordEmailCommandHandler];
-const EventHandlers = [SendSignupEmailEventHandler];
+const EventHandlers = [SendSignupEmailEventHandler, SendVerifyEmailEventHandler, SendResetPasswordEmailEventHandler];
 
 @Module({
   imports: [TypeOrmModule.forFeature([User, SignupEmailVerification, ResetPasswordEmailVerification])],

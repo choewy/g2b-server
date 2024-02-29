@@ -1,12 +1,13 @@
 import { Repository } from 'typeorm';
 
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
+import { CommandHandler, EventBus, ICommandHandler } from '@nestjs/cqrs';
 import { InjectRepository } from '@nestjs/typeorm';
 import { NotFoundException } from '@nestjs/common';
 
 import { User } from 'src/user/entities/user.entity';
 import { ResetPasswordEmailVerification } from 'src/email/entities/reset-password-email-verification.entity';
-import { EmailService } from 'src/email/email.service';
+import { SendResetPasswordEmailEvent } from 'src/email/events/implemenets/send-reset-password-email.event';
+
 import { SendResetPasswordEmailCommand } from '../implemenets/send-reset-password-email.command';
 
 @CommandHandler(SendResetPasswordEmailCommand)
@@ -16,7 +17,7 @@ export class SendResetPasswordEmailCommandHandler implements ICommandHandler<Sen
     private readonly userRepository: Repository<User>,
     @InjectRepository(ResetPasswordEmailVerification)
     private readonly resetPasswordEmailVerificationRepository: Repository<ResetPasswordEmailVerification>,
-    private readonly emailService: EmailService,
+    private readonly eventBus: EventBus,
   ) {}
 
   async execute(command: SendResetPasswordEmailCommand): Promise<void> {
@@ -26,8 +27,9 @@ export class SendResetPasswordEmailCommandHandler implements ICommandHandler<Sen
       throw new NotFoundException('등록되지 않은 이메일 계정입니다.');
     }
 
-    const resetPasswordEmailVerification = command.toEntity();
-    await this.resetPasswordEmailVerificationRepository.insert(resetPasswordEmailVerification);
-    await this.emailService.sendResetPasswordEmail(resetPasswordEmailVerification);
+    const emailVerification = command.toEntity();
+    await this.resetPasswordEmailVerificationRepository.insert(emailVerification);
+
+    this.eventBus.publish(new SendResetPasswordEmailEvent(command.email, emailVerification.tempPassword));
   }
 }

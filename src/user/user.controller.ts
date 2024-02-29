@@ -74,7 +74,6 @@ export class UserController {
   }
 
   @Post('verify/reset-password')
-  @UseGuards(JwtGuard)
   @ApiOperation({ summary: '임시 비밀번호 인증 및 비밀번호 재설정' })
   @ApiCreatedResponse({ type: UserDto })
   async verifyResetPassword(@Res({ passthrough: true }) res: Response, @Body() body: VerifyResetPasswordDto) {
