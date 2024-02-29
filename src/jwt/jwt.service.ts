@@ -9,10 +9,10 @@ import { ConfigFactory } from 'src/config/config.factory';
 import { JwtKey } from './enums';
 
 @Injectable()
-export class JwtService<G2bJwtPayload = JwtPayload & { id: number }> {
+export class JwtService<G2bJwtPayload = JwtPayload & { id: number; email: string }> {
   constructor(private readonly configFactory: ConfigFactory) {}
 
-  sign(type: JwtKey, id: number): string {
+  sign(type: JwtKey, id: number, email: string): string {
     let expiresIn: string;
 
     switch (type) {
@@ -25,7 +25,7 @@ export class JwtService<G2bJwtPayload = JwtPayload & { id: number }> {
         break;
     }
 
-    return sign({ id }, this.configFactory.jwtSecret, { expiresIn });
+    return sign({ id, email }, this.configFactory.jwtSecret, { expiresIn });
   }
 
   verify(token: string): {
@@ -39,8 +39,8 @@ export class JwtService<G2bJwtPayload = JwtPayload & { id: number }> {
     }
   }
 
-  setAccessToken(res: Response, id: number): void {
-    res.cookie(JwtKey.AccessToken, this.sign(JwtKey.AccessToken, id), {
+  setAccessToken(res: Response, id: number, email: string): void {
+    res.cookie(JwtKey.AccessToken, this.sign(JwtKey.AccessToken, id, email), {
       path: '/',
       httpOnly: true,
       secure: true,
@@ -49,8 +49,8 @@ export class JwtService<G2bJwtPayload = JwtPayload & { id: number }> {
     });
   }
 
-  setRefreshToken(res: Response, id: number): void {
-    res.cookie(JwtKey.RefreshToken, this.sign(JwtKey.RefreshToken, id), {
+  setRefreshToken(res: Response, id: number, email: string): void {
+    res.cookie(JwtKey.RefreshToken, this.sign(JwtKey.RefreshToken, id, email), {
       path: '/',
       httpOnly: true,
       secure: true,

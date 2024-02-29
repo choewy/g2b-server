@@ -18,6 +18,7 @@ export class JwtGuard implements CanActivate {
 
     if (accessTokenResult.payload) {
       request.id = accessTokenResult.payload.id;
+      request.email = accessTokenResult.payload.email;
 
       return true;
     }
@@ -36,10 +37,11 @@ export class JwtGuard implements CanActivate {
       throw new UnauthorizedException('다시 로그인하세요.', { cause: refreshTokenResult.error });
     }
 
-    request.id = refreshTokenResult.payload.id;
+    this.jwtService.setAccessToken(response, refreshTokenResult.payload.id, refreshTokenResult.payload.email);
+    this.jwtService.setRefreshToken(response, refreshTokenResult.payload.id, refreshTokenResult.payload.email);
 
-    this.jwtService.setAccessToken(response, refreshTokenResult.payload.id);
-    this.jwtService.setRefreshToken(response, refreshTokenResult.payload.id);
+    request.id = refreshTokenResult.payload.id;
+    request.email = refreshTokenResult.payload.email;
 
     return true;
   }

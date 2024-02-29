@@ -32,8 +32,8 @@ export class GetUserWithSignInQueryHandler implements IQueryHandler<GetUserWithS
       throw new UnauthorizedException('이메일 또는 비밀번호를 확인하세요.');
     }
 
-    this.jwtService.setAccessToken(query.res, user.id);
-    this.jwtService.setRefreshToken(query.res, user.id);
+    this.jwtService.setAccessToken(query.res, user.id, user.email);
+    this.jwtService.setRefreshToken(query.res, user.id, user.email);
 
     return new UserDto(user);
   }
