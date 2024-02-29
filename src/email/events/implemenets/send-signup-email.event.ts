@@ -10,8 +10,8 @@ export class SendSignupEmailEvent {
   toEntity(): SignupEmailVerification {
     return plainToInstance(SignupEmailVerification, {
       user: { id: this.userId },
-      code: v4().substring(0, 8),
-      expiresIn: DateTime.local().plus({ minutes: 15 }).toJSDate(),
+      code: v4().substring(0, 6),
+      expiresIn: DateTime.local().plus({ minutes: 5 }).toJSDate(),
     });
   }
 }

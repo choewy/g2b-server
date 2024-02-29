@@ -84,6 +84,7 @@ export class Logging extends AggregateRoot {
     if (exception) {
       params.statusCode = exception.getStatus();
       params.exception = exception.getResponse();
+      params.exception.cause = exception.cause;
     } else {
       params.statusCode = res.statusCode;
     }

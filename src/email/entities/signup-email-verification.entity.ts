@@ -8,7 +8,7 @@ export class SignupEmailVerification {
   readonly id: number;
 
   @Index('signup_email_verification_idx_code')
-  @Column({ type: 'char', length: 8 })
+  @Column({ type: 'char', length: 6 })
   readonly code: string;
 
   @Column({ type: 'boolean', default: false })

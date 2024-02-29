@@ -12,7 +12,14 @@ export class AppFilter implements ExceptionFilter {
     let exception = e as HttpException;
 
     if (exception instanceof HttpException === false) {
-      exception = new InternalServerErrorException(e);
+      exception = new InternalServerErrorException(undefined, {
+        description: e.name,
+        cause: {
+          name: e.name,
+          message: e.message,
+          stack: e.stack,
+        },
+      });
     }
 
     const http = host.switchToHttp();

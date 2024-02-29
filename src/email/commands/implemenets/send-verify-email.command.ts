@@ -10,7 +10,7 @@ export class SendVerifyEmailCommand {
   toEntity(): SignupEmailVerification {
     return plainToInstance(SignupEmailVerification, {
       user: { id: this.userId },
-      code: v4().replaceAll('-', '').substring(0, 8),
+      code: v4().replaceAll('-', '').substring(0, 6),
       expiresIn: DateTime.local().plus({ minutes: 5 }).toJSDate(),
     });
   }
