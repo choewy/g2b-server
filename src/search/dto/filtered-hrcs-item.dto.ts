@@ -20,6 +20,6 @@ export class FilteredHrcsItemDto implements Omit<HrcsItem, 'endPoint'> {
   }
 
   setKeywords(keywords: RegExpExecArray): void {
-    this.keywords = keywords.shift()[0];
+    this.keywords = keywords.shift() ?? '';
   }
 }

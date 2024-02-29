@@ -10,8 +10,6 @@ export class UploadSearchExcelFileEvent {
     readonly type: UploadedExcelFileType,
     readonly buffer: Buffer,
     readonly filename: string,
-    readonly publishSuccess: boolean = false,
-    readonly publishFail: boolean = false,
   ) {}
 
   toEntity(key: string): UploadedExcelFile {

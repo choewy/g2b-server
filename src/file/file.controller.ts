@@ -26,6 +26,6 @@ export class FileController {
   @ApiOperation({ summary: '내 사전규격 수집 파일 목록 불러오기' })
   @ApiOkResponse({ type: [UploadedExcelFileDto] })
   async getMyHrcsFiles(@ReqUserID() userId: number) {
-    return this.getMyExcelFilesQueryHandler.execute(new GetMyExcelFilesQuery(userId, UploadedExcelFileType.Bids));
+    return this.getMyExcelFilesQueryHandler.execute(new GetMyExcelFilesQuery(userId, UploadedExcelFileType.Hrcs));
   }
 }

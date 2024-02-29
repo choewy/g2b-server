@@ -1,4 +1,6 @@
 import { Repository } from 'typeorm';
+import { instanceToPlain } from 'class-transformer';
+
 import { Namespace, Socket } from 'socket.io';
 
 import { InjectRepository } from '@nestjs/typeorm';
@@ -45,10 +47,14 @@ export class SearchGateway implements OnGatewayConnection {
 
   sendCount(searchId: number, count: number): void {
     this.server.in(this.createRoomName(searchId)).emit('count', count);
+
+    setTimeout(() => {
+      this.server.in(this.createRoomName(searchId)).disconnectSockets(true);
+    }, 3_000);
   }
 
   sendExcelFile(searchId: number, excelFile: UploadedExcelFileDto): void {
-    this.server.in(this.createRoomName(searchId)).emit('excel-file', excelFile);
+    this.server.in(this.createRoomName(searchId)).emit('file', instanceToPlain(excelFile));
 
     setTimeout(() => {
       this.server.in(this.createRoomName(searchId)).disconnectSockets(true);

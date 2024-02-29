@@ -32,15 +32,11 @@ export class UploadSearchExcelFileEventHandler implements IEventHandler<UploadSe
       const uploadedExcelFile = event.toEntity(key);
       await this.uploadedExcelFileRepository.insert(uploadedExcelFile);
 
-      if (event.publishSuccess) {
-        this.eventBus.publish(new SuccessUploadSearchExcelFileEvent(searchId, type, new UploadedExcelFileDto(uploadedExcelFile)));
-      }
+      this.eventBus.publish(new SuccessUploadSearchExcelFileEvent(searchId, type, new UploadedExcelFileDto(uploadedExcelFile)));
 
       logging.debug('complete', { userId, type, filename, latency: logging.ms });
     } catch (e) {
-      if (event.publishSuccess) {
-        this.eventBus.publish(new FailUploadSearchExcelFileEvent(searchId, type, e));
-      }
+      this.eventBus.publish(new FailUploadSearchExcelFileEvent(searchId, type, e));
 
       logging.error('failed', { userId, type, filename, latency: logging.ms }, e);
     }

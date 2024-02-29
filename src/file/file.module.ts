@@ -6,7 +6,7 @@ import { AwsModule } from 'src/aws/aws.module';
 import { FileController } from './file.controller';
 import { UploadedExcelFile } from './entities/uploaded-excel-file.entity';
 import { GetMyExcelFilesQueryHandler } from './quries/handlers/get-my-excel-files.query.handler';
-import { UploadSearchExcelFileEventHandler } from './events/handlers/upload-search-excel-file.event';
+import { UploadSearchExcelFileEventHandler } from './events/handlers/upload-search-excel-file.event.handler';
 
 const QueryHandlers = [GetMyExcelFilesQueryHandler];
 const EventHandlers = [UploadSearchExcelFileEventHandler];

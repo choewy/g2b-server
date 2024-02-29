@@ -49,6 +49,10 @@ export class HrcsService {
       do {
         const body = await this.getItemsOnce(endPoint, params);
 
+        if (Array.isArray(body.items) === false) {
+          break;
+        }
+
         totalCount = body.totalCount;
         currentCount = body.pageNo * body.numOfRows;
 

@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { JwtGuard } from 'src/jwt/jwt.guard';
@@ -16,6 +16,7 @@ import { DeleteKeywordCommandHandler } from './commands/handler/delete-keyword.c
 import { DeleteKeywordCommand } from './commands/implements/delete-keyword.command';
 import { KeywordDto } from './dto/keyword.dto';
 import { KeywordIdDto } from './dto/keyword-id.dto';
+import { GetKeywordsDto } from './dto/get-keywords.dto';
 
 @ApiTags('키워드')
 @UseGuards(JwtGuard)
@@ -31,8 +32,8 @@ export class KeywordController {
   @Get()
   @ApiOperation({ summary: '키워드 조회' })
   @ApiOkResponse({ type: [KeywordDto] })
-  async getKeywords(@ReqUserID() userId: number) {
-    return this.getKeywordsQueryHandler.execute(new GetKeywordsQuery(userId));
+  async getKeywords(@ReqUserID() userId: number, @Query() query: GetKeywordsDto) {
+    return this.getKeywordsQueryHandler.execute(new GetKeywordsQuery(userId, query));
   }
 
   @Post()
