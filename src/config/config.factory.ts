@@ -6,6 +6,7 @@ import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.int
 import { ConfigService } from '@nestjs/config';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { S3ClientConfig } from '@aws-sdk/client-s3';
+import SMTPTransport from 'nodemailer/lib/smtp-transport';
 
 @Injectable()
 export class ConfigFactory {
@@ -86,5 +87,15 @@ export class ConfigFactory {
 
   get awsS3Bucket(): string {
     return this.configService.get<string>('AWS_S3_BUCKET');
+  }
+
+  get emailTransportOptions(): SMTPTransport.Options {
+    return {
+      service: this.configService.get<string>('EMAIL_SERVICE'),
+      auth: {
+        user: this.configService.get<string>('EMAIL_USER'),
+        pass: this.configService.get<string>('EMAIL_PASSWORD'),
+      },
+    };
   }
 }
