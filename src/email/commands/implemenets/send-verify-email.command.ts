@@ -4,7 +4,7 @@ import { plainToInstance } from 'class-transformer';
 
 import { SignupEmailVerification } from 'src/email/entities/signup-email-verification.entity';
 
-export class SendSignupEmailCommand {
+export class SendVerifyEmailCommand {
   constructor(readonly userId: number, readonly email: string) {}
 
   toEntity(): SignupEmailVerification {

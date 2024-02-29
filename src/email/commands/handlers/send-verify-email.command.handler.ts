@@ -6,20 +6,20 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { EmailService } from 'src/email/email.service';
 import { SignupEmailVerification } from 'src/email/entities/signup-email-verification.entity';
 
-import { SendSignupEmailCommand } from '../implemenets/send-signup-email.command';
+import { SendVerifyEmailCommand } from '../implemenets/send-verify-email.command';
 
-@CommandHandler(SendSignupEmailCommand)
-export class SendSignupEmailCommandHandler implements ICommandHandler<SendSignupEmailCommand> {
+@CommandHandler(SendVerifyEmailCommand)
+export class SendVerifyEmailCommandHandler implements ICommandHandler<SendVerifyEmailCommand> {
   constructor(
     @InjectRepository(SignupEmailVerification)
     private readonly signupEmailVerificationRepository: Repository<SignupEmailVerification>,
     private readonly emailService: EmailService,
   ) {}
 
-  async execute(command: SendSignupEmailCommand): Promise<void> {
+  async execute(command: SendVerifyEmailCommand): Promise<void> {
     const signupEmailVerification = command.toEntity();
 
     await this.signupEmailVerificationRepository.insert(signupEmailVerification);
-    await this.emailService.sendSignupEmail(command.email, signupEmailVerification);
+    await this.emailService.sendVerifyEmail(command.email, signupEmailVerification);
   }
 }

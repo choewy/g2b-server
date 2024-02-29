@@ -65,11 +65,11 @@ export class UserController {
     return this.jwtService.deleteTokens(res);
   }
 
-  @Post('verify/signup')
+  @Post('verify/email')
   @UseGuards(JwtGuard)
-  @ApiOperation({ summary: '회원가입 이메일 코드 인증' })
+  @ApiOperation({ summary: '이메일 코드 인증' })
   @ApiCreatedResponse({ type: UserDto })
-  async verifySignupEmailCode(@ReqUserID() userId: number, @Body() body: VerifySignupEmailCodeDto) {
+  async verifyEmailCode(@ReqUserID() userId: number, @Body() body: VerifySignupEmailCodeDto) {
     return this.verifySignupEmailCodeCommandHandler.execute(new VerifySignupEmailCodeCommand(userId, body.code));
   }
 

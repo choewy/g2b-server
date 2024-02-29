@@ -40,6 +40,19 @@ export class EmailService {
     return this.sendEmail(email, title, contnets);
   }
 
+  async sendVerifyEmail(email: string, signupEmailVerification: SignupEmailVerification): Promise<void> {
+    const title = '[G2B] 이메일 인증을 완료해주세요.';
+    const contnets = [
+      '안녕하세요. G2B 개발자입니다.',
+      '정상적인 서비스 이용을 위해 아래 인증 코드를 입력해주세요.\n(인증 코드는 5분 후 만료됩니다.)',
+      `인증코드 : ${signupEmailVerification.code}`,
+      '감사합니다.',
+      'G2B 개발자 드림.',
+    ].join('\n\n');
+
+    return this.sendEmail(email, title, contnets);
+  }
+
   async sendResetPasswordEmail(resetPasswordEmailVerification: ResetPasswordEmailVerification): Promise<void> {
     const title = '[G2B] 임시 비밀번호가 발급되었습니다.';
     const contnets = [

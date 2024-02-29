@@ -7,11 +7,11 @@ import { EmailController } from './email.controller';
 import { EmailService } from './email.service';
 import { SignupEmailVerification } from './entities/signup-email-verification.entity';
 import { SendSignupEmailEventHandler } from './events/handlers/send-signup-email.event.handler';
-import { SendSignupEmailCommandHandler } from './commands/handlers/send-signup-email.command.handler';
+import { SendVerifyEmailCommandHandler } from './commands/handlers/send-verify-email.command.handler';
 import { ResetPasswordEmailVerification } from './entities/reset-password-email-verification.entity';
 import { SendResetPasswordEmailCommandHandler } from './commands/handlers/send-reset-password-email.command.handler';
 
-const CommandHandlers = [SendSignupEmailCommandHandler, SendResetPasswordEmailCommandHandler];
+const CommandHandlers = [SendVerifyEmailCommandHandler, SendResetPasswordEmailCommandHandler];
 const EventHandlers = [SendSignupEmailEventHandler];
 
 @Module({

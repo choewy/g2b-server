@@ -1,29 +1,30 @@
 import { Body, Controller, Post, UseGuards } from '@nestjs/common';
-import { ApiCreatedResponse, ApiOperation } from '@nestjs/swagger';
+import { ApiCreatedResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { JwtGuard } from 'src/jwt/jwt.guard';
 import { ReqUserID } from 'src/decorators/req-user-id.param';
 import { ReqUserEmail } from 'src/decorators/req-user-email.param';
 
-import { SendSignupEmailCommandHandler } from './commands/handlers/send-signup-email.command.handler';
-import { SendSignupEmailCommand } from './commands/implemenets/send-signup-email.command';
+import { SendVerifyEmailCommandHandler } from './commands/handlers/send-verify-email.command.handler';
+import { SendVerifyEmailCommand } from './commands/implemenets/send-verify-email.command';
 import { SendResetPasswordEmailCommandHandler } from './commands/handlers/send-reset-password-email.command.handler';
 import { SendResetPasswordEmailDto } from './dto/send-reset-password-email.dto';
 import { SendResetPasswordEmailCommand } from './commands/implemenets/send-reset-password-email.command';
 
+@ApiTags('이메일 발송')
 @Controller('email')
 export class EmailController {
   constructor(
-    private readonly sendSignupEmailCommandHandler: SendSignupEmailCommandHandler,
+    private readonly sendVerifyEmailCommandHandler: SendVerifyEmailCommandHandler,
     private readonly sendResetPasswordEmailCommandHandler: SendResetPasswordEmailCommandHandler,
   ) {}
 
-  @Post('signup')
+  @Post('verify')
   @UseGuards(JwtGuard)
-  @ApiOperation({ summary: '회원가입 인증 메일 발송' })
+  @ApiOperation({ summary: '인증 메일 발송' })
   @ApiCreatedResponse({ type: null })
-  async sendSignupEmail(@ReqUserID() userId: number, @ReqUserEmail() email: string) {
-    return this.sendSignupEmailCommandHandler.execute(new SendSignupEmailCommand(userId, email));
+  async sendVerifyEmail(@ReqUserID() userId: number, @ReqUserEmail() email: string) {
+    return this.sendVerifyEmailCommandHandler.execute(new SendVerifyEmailCommand(userId, email));
   }
 
   @Post('reset-password')
