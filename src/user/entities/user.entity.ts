@@ -18,6 +18,9 @@ export class User {
   @Column({ type: 'varchar', length: 200 })
   password: string;
 
+  @Column({ type: 'boolean', default: false })
+  verified: boolean;
+
   @OneToMany(() => Keyword, (e) => e.user, { cascade: true })
   @JoinTable()
   keywords: Keyword[];

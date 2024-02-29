@@ -1,7 +1,7 @@
 import { Response } from 'express';
 
 import { Body, Controller, Get, Post, Res, UseGuards } from '@nestjs/common';
-import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { JwtGuard } from 'src/jwt/jwt.guard';
 import { ReqUserID } from 'src/decorators/req-id.param';
@@ -37,18 +37,21 @@ export class UserController {
 
   @Post('signin')
   @ApiOperation({ summary: '로그인' })
+  @ApiCreatedResponse({ type: UserDto })
   async signIn(@Res({ passthrough: true }) res: Response, @Body() body: SignInDto) {
     return this.getUserWithSignInQueryHandler.execute(new GetUserWithSignInQuery(res, body));
   }
 
   @Post('signup')
   @ApiOperation({ summary: '회원가입' })
+  @ApiCreatedResponse({ type: UserDto })
   async signUp(@Res({ passthrough: true }) res: Response, @Body() body: SignUpDto) {
     return this.createUserCommandHandler.execute(new CreateUserCommand(res, body));
   }
 
   @Post('signout')
   @ApiOperation({ summary: '로그아웃' })
+  @ApiCreatedResponse({ type: null })
   async signOut(@Res({ passthrough: true }) res: Response) {
     return this.jwtService.deleteTokens(res);
   }

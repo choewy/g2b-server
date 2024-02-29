@@ -8,6 +8,7 @@ import { JwtService } from 'src/jwt/jwt.service';
 import { User } from 'src/user/entities/user.entity';
 
 import { CreateUserCommand } from '../implements/create-user.command';
+import { UserDto } from 'src/user/dto/user.dto';
 
 @CommandHandler(CreateUserCommand)
 export class CreateUserCommandHandler implements ICommandHandler<CreateUserCommand> {
@@ -17,7 +18,7 @@ export class CreateUserCommandHandler implements ICommandHandler<CreateUserComma
     private readonly jwtService: JwtService,
   ) {}
 
-  async execute(command: CreateUserCommand): Promise<void> {
+  async execute(command: CreateUserCommand): Promise<UserDto> {
     const exist = await this.userRepository.existsBy({ email: command.body.email });
 
     if (exist) {
@@ -33,5 +34,7 @@ export class CreateUserCommandHandler implements ICommandHandler<CreateUserComma
 
     this.jwtService.setAccessToken(command.res, user.id);
     this.jwtService.setRefreshToken(command.res, user.id);
+
+    return new UserDto(user);
   }
 }

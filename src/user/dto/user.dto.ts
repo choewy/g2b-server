@@ -9,8 +9,12 @@ export class UserDto {
   @ApiResponseProperty({ type: String })
   name: string;
 
+  @ApiResponseProperty({ type: Boolean })
+  verified: boolean;
+
   constructor(user: User) {
     this.email = user.email;
     this.name = user.name;
+    this.verified = user.verified;
   }
 }

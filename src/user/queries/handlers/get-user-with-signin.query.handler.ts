@@ -9,6 +9,7 @@ import { JwtService } from 'src/jwt/jwt.service';
 import { User } from 'src/user/entities/user.entity';
 
 import { GetUserWithSignInQuery } from '../implements/get-user-with-signin.query';
+import { UserDto } from 'src/user/dto/user.dto';
 
 @QueryHandler(GetUserWithSignInQuery)
 export class GetUserWithSignInQueryHandler implements IQueryHandler<GetUserWithSignInQuery> {
@@ -18,7 +19,7 @@ export class GetUserWithSignInQueryHandler implements IQueryHandler<GetUserWithS
     private readonly jwtService: JwtService,
   ) {}
 
-  async execute(query: GetUserWithSignInQuery): Promise<void> {
+  async execute(query: GetUserWithSignInQuery): Promise<UserDto> {
     const user = await this.userRepository.findOneBy({ email: query.body.email });
 
     if (user == null) {
@@ -33,5 +34,7 @@ export class GetUserWithSignInQueryHandler implements IQueryHandler<GetUserWithS
 
     this.jwtService.setAccessToken(query.res, user.id);
     this.jwtService.setRefreshToken(query.res, user.id);
+
+    return new UserDto(user);
   }
 }
