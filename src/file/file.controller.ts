@@ -2,7 +2,7 @@ import { Controller, Get, UseGuards } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { JwtGuard } from 'src/jwt/jwt.guard';
-import { ReqUserID } from 'src/decorators/req-id.param';
+import { ReqUserID } from 'src/decorators/req-user-id.param';
 
 import { UploadedExcelFileType } from './entities/enums';
 import { GetMyExcelFilesQueryHandler } from './quries/handlers/get-my-excel-files.query.handler';

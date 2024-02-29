@@ -2,7 +2,7 @@ import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { JwtGuard } from 'src/jwt/jwt.guard';
-import { ReqUserID } from 'src/decorators/req-id.param';
+import { ReqUserID } from 'src/decorators/req-user-id.param';
 
 import { SearchStateType } from './entities/enums';
 import { SearchStateDto } from './dto/search-state.dto';
