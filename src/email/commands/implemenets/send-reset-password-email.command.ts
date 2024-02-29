@@ -10,7 +10,7 @@ export class SendResetPasswordEmailCommand {
   toEntity(): ResetPasswordEmailVerification {
     return plainToInstance(ResetPasswordEmailVerification, {
       email: this.email,
-      tempPassword: v4().substring(0, 16),
+      tempPassword: v4().replaceAll('-', '').substring(0, 16),
       expiresIn: DateTime.local().plus({ minutes: 5 }).toJSDate(),
     });
   }

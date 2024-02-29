@@ -20,6 +20,9 @@ import { CreateUserCommand } from './commands/implements/create-user.command';
 import { VerifySignupEmailCodeDto } from './dto/verify-signup-email-code.dto';
 import { VerifySignupEmailCodeCommandHandler } from './commands/handlers/verify-signup-email-code.command.handler';
 import { VerifySignupEmailCodeCommand } from './commands/implements/verify-signup-email-code.command';
+import { VerifyResetPasswordCommandHandler } from './commands/handlers/verify-reset-password.command.handler';
+import { VerifyResetPasswordCommand } from './commands/implements/verify-reset-password.command';
+import { VerifyResetPasswordDto } from './dto/verify-and-change-password.dto';
 
 @ApiTags('사용자')
 @Controller('users')
@@ -30,6 +33,7 @@ export class UserController {
     private readonly getUserWithSignInQueryHandler: GetUserWithSignInQueryHandler,
     private readonly createUserCommandHandler: CreateUserCommandHandler,
     private readonly verifySignupEmailCodeCommandHandler: VerifySignupEmailCodeCommandHandler,
+    private readonly verifyResetPasswordCommandHandler: VerifyResetPasswordCommandHandler,
   ) {}
 
   @Get('auth')
@@ -67,5 +71,13 @@ export class UserController {
   @ApiCreatedResponse({ type: UserDto })
   async verifySignupEmailCode(@ReqUserID() userId: number, @Body() body: VerifySignupEmailCodeDto) {
     return this.verifySignupEmailCodeCommandHandler.execute(new VerifySignupEmailCodeCommand(userId, body.code));
+  }
+
+  @Post('verify/reset-password')
+  @UseGuards(JwtGuard)
+  @ApiOperation({ summary: '비밀번호 재설정' })
+  @ApiCreatedResponse({ type: UserDto })
+  async verifyResetPassword(@Res({ passthrough: true }) res: Response, @Body() body: VerifyResetPasswordDto) {
+    return this.verifyResetPasswordCommandHandler.execute(new VerifyResetPasswordCommand(res, body));
   }
 }

@@ -1,4 +1,5 @@
-import { Column, CreateDateColumn, Entity, Index, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { User } from 'src/user/entities/user.entity';
+import { Column, CreateDateColumn, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 
 @Entity()
 @Index('reset_password_email_verification_idx_email_temp_password', ['email', 'tempPassword'])
@@ -23,4 +24,11 @@ export class ResetPasswordEmailVerification {
 
   @UpdateDateColumn()
   readonly updatedAt: Date;
+
+  @ManyToOne(() => User, (e) => e.resetPasswordEmailVerification, {
+    onDelete: 'CASCADE',
+    nullable: true,
+  })
+  @JoinColumn()
+  user: User | null;
 }

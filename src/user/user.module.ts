@@ -7,12 +7,14 @@ import { GetUserWithAuthQueryHandler } from './queries/handlers/get-user-with-au
 import { GetUserWithSignInQueryHandler } from './queries/handlers/get-user-with-signin.query.handler';
 import { CreateUserCommandHandler } from './commands/handlers/create-user.command.handler';
 import { VerifySignupEmailCodeCommandHandler } from './commands/handlers/verify-signup-email-code.command.handler';
+import { ResetPasswordEmailVerification } from 'src/email/entities/reset-password-email-verification.entity';
+import { VerifyResetPasswordCommandHandler } from './commands/handlers/verify-reset-password.command.handler';
 
 const QueryHandlers = [GetUserWithAuthQueryHandler, GetUserWithSignInQueryHandler];
-const CommandHandlers = [CreateUserCommandHandler, VerifySignupEmailCodeCommandHandler];
+const CommandHandlers = [CreateUserCommandHandler, VerifySignupEmailCodeCommandHandler, VerifyResetPasswordCommandHandler];
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User])],
+  imports: [TypeOrmModule.forFeature([User, ResetPasswordEmailVerification])],
   controllers: [UserController],
   providers: [...QueryHandlers, ...CommandHandlers],
 })
