@@ -3,9 +3,13 @@ import { Response } from 'express';
 import { Body, Controller, Get, Post, Res, UseGuards } from '@nestjs/common';
 import { ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
+import { ReqUserID } from 'src/decorators/req-user-id.param';
 import { JwtGuard } from 'src/jwt/jwt.guard';
-import { ReqUserID } from 'src/decorators/req-id.param';
 import { JwtService } from 'src/jwt/jwt.service';
+
+import { SignInDto } from './dto/sign-in.dto';
+import { SignUpDto } from './dto/sign-up.dto';
+import { UserDto } from './dto/user.dto';
 
 import { GetUserWithAuthQueryHandler } from './queries/handlers/get-user-with-auth.query.handler';
 import { GetUserWithAuthQuery } from './queries/implements/get-user-with-auth.query';
@@ -13,18 +17,19 @@ import { GetUserWithSignInQueryHandler } from './queries/handlers/get-user-with-
 import { GetUserWithSignInQuery } from './queries/implements/get-user-with-signin.query';
 import { CreateUserCommandHandler } from './commands/handlers/create-user.command.handler';
 import { CreateUserCommand } from './commands/implements/create-user.command';
-import { SignInDto } from './dto/sign-in.dto';
-import { SignUpDto } from './dto/sign-up.dto';
-import { UserDto } from './dto/user.dto';
+import { VerifySignupEmailCodeDto } from './dto/verify-signup-email-code.dto';
+import { VerifySignupEmailCodeCommandHandler } from './commands/handlers/verify-signup-email-code.command.handler';
+import { VerifySignupEmailCodeCommand } from './commands/implements/verify-signup-email-code.command';
 
 @ApiTags('사용자')
 @Controller('users')
 export class UserController {
   constructor(
+    private readonly jwtService: JwtService,
     private readonly getUserWithAuthQueryHandler: GetUserWithAuthQueryHandler,
     private readonly getUserWithSignInQueryHandler: GetUserWithSignInQueryHandler,
     private readonly createUserCommandHandler: CreateUserCommandHandler,
-    private readonly jwtService: JwtService,
+    private readonly verifySignupEmailCodeCommandHandler: VerifySignupEmailCodeCommandHandler,
   ) {}
 
   @Get('auth')
@@ -54,5 +59,13 @@ export class UserController {
   @ApiCreatedResponse({ type: null })
   async signOut(@Res({ passthrough: true }) res: Response) {
     return this.jwtService.deleteTokens(res);
+  }
+
+  @Post('verify/signup')
+  @UseGuards(JwtGuard)
+  @ApiOperation({ summary: '회원가입 이메일 코드 인증' })
+  @ApiCreatedResponse({ type: UserDto })
+  async verifySignupEmailCode(@ReqUserID() userId: number, @Body() body: VerifySignupEmailCodeDto) {
+    return this.verifySignupEmailCodeCommandHandler.execute(new VerifySignupEmailCodeCommand(userId, body.code));
   }
 }

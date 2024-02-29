@@ -3,6 +3,7 @@ import { Column, Entity, JoinTable, OneToMany, PrimaryGeneratedColumn } from 'ty
 import { Keyword } from 'src/keyword/entities/keyword.entity';
 import { SearchState } from 'src/search/entities/search-state.entity';
 import { UploadedExcelFile } from 'src/file/entities/uploaded-excel-file.entity';
+import { SignupEmailVerification } from 'src/email/entities/signup-email-verification.entity';
 
 @Entity()
 export class User {
@@ -32,4 +33,8 @@ export class User {
   @OneToMany(() => UploadedExcelFile, (e) => e.user, { cascade: true })
   @JoinTable()
   uploadedExcelFiles: UploadedExcelFile[];
+
+  @OneToMany(() => SignupEmailVerification, (e) => e.user, { cascade: true })
+  @JoinTable()
+  signupEmailVerifications: SignupEmailVerification[];
 }
