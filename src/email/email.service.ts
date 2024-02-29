@@ -4,6 +4,7 @@ import { Injectable } from '@nestjs/common';
 
 import { ConfigFactory } from 'src/config/config.factory';
 import { SignupEmailVerification } from './entities/signup-email-verification.entity';
+import { ResetPasswordEmailVerification } from './entities/reset-password-email-verification.entity';
 
 @Injectable()
 export class EmailService {
@@ -30,12 +31,25 @@ export class EmailService {
     const title = '[G2B] 회원가입을 축하드립니다.';
     const contnets = [
       '안녕하세요. G2B 개발자입니다.',
-      '정상적인 서비스 이용을 위해 아래 인증 코드를 입력해주세요.',
+      '정상적인 서비스 이용을 위해 아래 인증 코드를 입력해주세요.\n(인증 코드는 5분 후 만료됩니다.)',
       `인증코드 : ${signupEmailVerification.code}`,
       '감사합니다.',
       'G2B 개발자 드림.',
     ].join('\n\n');
 
     return this.sendEmail(email, title, contnets);
+  }
+
+  async sendResetPasswordEmail(resetPasswordEmailVerification: ResetPasswordEmailVerification): Promise<void> {
+    const title = '[G2B] 임시 비밀번호가 발급되었습니다.';
+    const contnets = [
+      '안녕하세요. G2B 개발자입니다.',
+      '발급된 임시 비밀번호를 사용하여 비밀번호를 재설정하세요.\n(임시 비밀번호는 5분 후 만료됩니다.)',
+      `임시 비밀번호 : ${resetPasswordEmailVerification.tempPassword}`,
+      '감사합니다.',
+      'G2B 개발자 드림.',
+    ].join('\n\n');
+
+    return this.sendEmail(resetPasswordEmailVerification.email, title, contnets);
   }
 }

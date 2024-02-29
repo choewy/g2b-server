@@ -12,6 +12,7 @@ import { AppFilter } from './app.filter';
 
 import { FileModule } from './file/file.module';
 import { UserModule } from './user/user.module';
+import { EmailModule } from './email/email.module';
 import { KeywordModule } from './keyword/keyword.module';
 import { SearchModule } from './search/search.module';
 
@@ -24,6 +25,7 @@ import { SearchModule } from './search/search.module';
     JwtModule.forRoot(),
     FileModule,
     UserModule,
+    EmailModule,
     KeywordModule,
     SearchModule,
   ],

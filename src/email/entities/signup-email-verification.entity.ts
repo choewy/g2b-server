@@ -7,7 +7,7 @@ export class SignupEmailVerification {
   @PrimaryGeneratedColumn({ type: 'int', unsigned: true })
   readonly id: number;
 
-  @Index('email_signup_verification_idx_code')
+  @Index('signup_email_verification_idx_code')
   @Column({ type: 'char', length: 8 })
   readonly code: string;
 
