@@ -26,7 +26,7 @@ export class S3Service {
     return `${this.configFactory.nodeEnv}/${key}`;
   }
 
-  async upload(buffer: Buffer, path?: string, mimetype?: string): Promise<string> {
+  async upload(buffer: Buffer, path?: string, mimetype?: string, filename?: string): Promise<string> {
     const key = this.createKey(path);
 
     const command = new PutObjectCommand({
@@ -34,6 +34,7 @@ export class S3Service {
       Body: buffer,
       Bucket: this.configFactory.awsS3Bucket,
       ContentType: mimetype,
+      ContentDisposition: filename ? `attachement; filename=${encodeURIComponent(filename)}` : undefined,
       ACL: 'private',
     });
 
@@ -42,7 +43,7 @@ export class S3Service {
     return key;
   }
 
-  async uploadExcelFile(buffer: Buffer, path?: string): Promise<string> {
-    return this.upload(buffer, path, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+  async uploadExcelFile(buffer: Buffer, path?: string, filename?: string): Promise<string> {
+    return this.upload(buffer, path, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', filename);
   }
 }
