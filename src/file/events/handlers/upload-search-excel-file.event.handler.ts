@@ -33,6 +33,7 @@ export class UploadSearchExcelFileEventHandler implements IEventHandler<UploadSe
       await this.uploadedExcelFileRepository.insert(uploadedExcelFile);
 
       this.eventBus.publish(new SuccessUploadSearchExcelFileEvent(userId, type, new UploadedExcelFileDto(uploadedExcelFile)));
+      this.eventBus.publish(new EndSearchEvent(userId, type));
 
       logging.debug('completed', { userId, type, filename, latency: logging.ms });
     } catch (e) {

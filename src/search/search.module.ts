@@ -19,7 +19,7 @@ import { StartSearchBidsEventHandler } from './events/handlers/start-search-bids
 import { SearchHrcsCommandHandler } from './commands/handlers/seach-hrcs.command.handler';
 import { StartSearchHrcsEventHandler } from './events/handlers/start-search-hrcs.event.handler';
 import { SuccessUploadSearchExcelFileEventHandler } from './events/handlers/success-upload-search-excel-file.event.handler';
-import { EndSearchEventHandler } from './events/handlers/end-search,event.handlers';
+import { EndSearchEventHandler } from './events/handlers/end-search.event.handlers';
 
 const QueryHandlers = [GetSearchStateQueryHandler];
 const CommandHandlers = [SearchBidsCommandHandler, SearchHrcsCommandHandler];

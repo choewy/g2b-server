@@ -9,6 +9,5 @@ export class SuccessUploadSearchExcelFileEventHandler implements IEventHandler<S
 
   async handle(event: SuccessUploadSearchExcelFileEvent) {
     this.searchGateway.sendFile(event.userId, event.uploadedExcelFile);
-    this.searchGateway.sendEnd(event.userId, event.type);
   }
 }
