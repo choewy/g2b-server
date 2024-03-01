@@ -1,14 +1,14 @@
-import { Repository } from 'typeorm';
-import { instanceToPlain } from 'class-transformer';
+import cookie from 'cookie';
 
 import { Namespace, Socket } from 'socket.io';
 
-import { InjectRepository } from '@nestjs/typeorm';
 import { OnGatewayConnection, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 
+import { JwtService } from 'src/jwt/jwt.service';
+import { JwtKey } from 'src/jwt/enums';
 import { UploadedExcelFileDto } from 'src/file/dto/uploaded-excel-file.dto';
 
-import { SearchState } from './entities/search-state.entity';
+import { SearchStateType } from './entities/enums';
 
 @WebSocketGateway({
   namespace: 'search',
@@ -18,54 +18,33 @@ export class SearchGateway implements OnGatewayConnection {
   @WebSocketServer()
   private readonly server: Namespace;
 
-  constructor(
-    @InjectRepository(SearchState)
-    private readonly searchStateRepository: Repository<SearchState>,
-  ) {}
+  constructor(private readonly jwtService: JwtService) {}
 
   async handleConnection(client: Socket): Promise<void> {
-    const searchId = client.handshake.auth.searchId;
+    const cookies = cookie.parse(client.request.headers.cookie);
 
-    if (searchId == null) {
+    const { error, payload } = this.jwtService.verify(cookies[JwtKey.AccessToken]);
+
+    if (error) {
       client.disconnect(true);
-      return;
+    } else {
+      await client.join(this.createRoom(payload.id));
     }
-
-    const exist = await this.searchStateRepository.existsBy({ id: searchId });
-
-    if (exist === false) {
-      client.disconnect(true);
-      return;
-    }
-
-    await client.join(this.createRoomName(searchId));
   }
 
-  createRoomName(searchId: number): string {
-    return ['search', searchId].join(':');
+  createRoom(userId: number): string {
+    return ['search', userId].join(':');
   }
 
-  sendCount(searchId: number, count: number): void {
-    this.server.in(this.createRoomName(searchId)).emit('count', count);
-
-    setTimeout(() => {
-      this.server.in(this.createRoomName(searchId)).disconnectSockets(true);
-    }, 3_000);
+  sendCount(userId: number, type: SearchStateType, count: number): void {
+    this.server.in(this.createRoom(userId)).emit('count', { type, count });
   }
 
-  sendExcelFile(searchId: number, excelFile: UploadedExcelFileDto): void {
-    this.server.in(this.createRoomName(searchId)).emit('file', instanceToPlain(excelFile));
-
-    setTimeout(() => {
-      this.server.in(this.createRoomName(searchId)).disconnectSockets(true);
-    }, 3_000);
+  sendFile(userId: number, excelFile: UploadedExcelFileDto): void {
+    this.server.in(this.createRoom(userId)).emit('file', excelFile);
   }
 
-  sendFail(searchId: number, e: unknown): void {
-    this.server.in(this.createRoomName(searchId)).emit('fail', e);
-
-    setTimeout(() => {
-      this.server.in(this.createRoomName(searchId)).disconnectSockets(true);
-    }, 3_000);
+  sendEnd(userId: number, type: SearchStateType, error?: unknown): void {
+    this.server.in(this.createRoom(userId)).emit('end', { type, error });
   }
 }

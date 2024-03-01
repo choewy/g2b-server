@@ -1,5 +1,5 @@
-import { UploadedExcelFileType } from 'src/file/entities/enums';
+import { SearchStateType } from 'src/search/entities/enums';
 
 export class GetMyExcelFilesQuery {
-  constructor(readonly userId: number, readonly type: UploadedExcelFileType) {}
+  constructor(readonly userId: number, readonly type: SearchStateType) {}
 }

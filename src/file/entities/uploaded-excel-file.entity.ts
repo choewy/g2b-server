@@ -2,7 +2,7 @@ import { Column, CreateDateColumn, Entity, Index, JoinColumn, ManyToOne, Primary
 
 import { User } from 'src/user/entities/user.entity';
 
-import { UploadedExcelFileType } from './enums';
+import { SearchStateType } from 'src/search/entities/enums';
 
 @Entity()
 @Index('uploaded_excel_file_idx_user_type', ['user.id', 'type'])
@@ -11,7 +11,7 @@ export class UploadedExcelFile {
   readonly id: number;
 
   @Column({ type: 'varchar', length: 20 })
-  type: UploadedExcelFileType;
+  type: SearchStateType;
 
   @Column({ type: 'varchar', length: 255, unique: true })
   key: string;

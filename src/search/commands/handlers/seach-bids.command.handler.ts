@@ -34,7 +34,7 @@ export class SearchBidsCommandHandler implements ICommandHandler<SearchBidsComma
 
     await this.searchStateRepository.insert(searchState);
 
-    this.eventBus.publish(new StartSearchBidsEvent(searchState.id, command.userId, command.params));
+    this.eventBus.publish(new StartSearchBidsEvent(command.userId, command.params));
 
     return new SearchStateDto(searchState);
   }

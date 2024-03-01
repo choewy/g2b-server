@@ -3,8 +3,8 @@ import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { JwtGuard } from 'src/jwt/jwt.guard';
 import { ReqUserID } from 'src/decorators/req-user-id.param';
+import { SearchStateType } from 'src/search/entities/enums';
 
-import { UploadedExcelFileType } from './entities/enums';
 import { GetMyExcelFilesQueryHandler } from './quries/handlers/get-my-excel-files.query.handler';
 import { GetMyExcelFilesQuery } from './quries/implements/get-my-excel-files.query';
 import { UploadedExcelFileDto } from './dto/uploaded-excel-file.dto';
@@ -19,13 +19,13 @@ export class FileController {
   @ApiOperation({ summary: '내 입찰공고 수집 파일 목록 불러오기' })
   @ApiOkResponse({ type: [UploadedExcelFileDto] })
   async getMyBidsFiles(@ReqUserID() userId: number) {
-    return this.getMyExcelFilesQueryHandler.execute(new GetMyExcelFilesQuery(userId, UploadedExcelFileType.Bids));
+    return this.getMyExcelFilesQueryHandler.execute(new GetMyExcelFilesQuery(userId, SearchStateType.Bids));
   }
 
   @Get('hrcs')
   @ApiOperation({ summary: '내 사전규격 수집 파일 목록 불러오기' })
   @ApiOkResponse({ type: [UploadedExcelFileDto] })
   async getMyHrcsFiles(@ReqUserID() userId: number) {
-    return this.getMyExcelFilesQueryHandler.execute(new GetMyExcelFilesQuery(userId, UploadedExcelFileType.Hrcs));
+    return this.getMyExcelFilesQueryHandler.execute(new GetMyExcelFilesQuery(userId, SearchStateType.Hrcs));
   }
 }

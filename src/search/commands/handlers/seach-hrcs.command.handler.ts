@@ -34,7 +34,7 @@ export class SearchHrcsCommandHandler implements ICommandHandler<SearchHrcsComma
 
     await this.searchStateRepository.insert(searchState);
 
-    this.eventBus.publish(new StartSearchHrcsEvent(searchState.id, command.userId, command.params));
+    this.eventBus.publish(new StartSearchHrcsEvent(command.userId, command.params));
 
     return new SearchStateDto(searchState);
   }

@@ -18,8 +18,8 @@ import { SearchBidsCommandHandler } from './commands/handlers/seach-bids.command
 import { StartSearchBidsEventHandler } from './events/handlers/start-search-bids.event.handler';
 import { SearchHrcsCommandHandler } from './commands/handlers/seach-hrcs.command.handler';
 import { StartSearchHrcsEventHandler } from './events/handlers/start-search-hrcs.event.handler';
-import { SuccessUploadSearchExcelFileEventHandler } from './events/handlers/success-upload-excel-file.event.handler';
-import { FailUploadSearchExcelFileEventHandler } from './events/handlers/fail-upload-excel-file.event.handler';
+import { SuccessUploadSearchExcelFileEventHandler } from './events/handlers/success-upload-search-excel-file.event.handler';
+import { EndSearchEventHandler } from './events/handlers/end-search,event.handlers';
 
 const QueryHandlers = [GetSearchStateQueryHandler];
 const CommandHandlers = [SearchBidsCommandHandler, SearchHrcsCommandHandler];
@@ -27,7 +27,7 @@ const EventHandlers = [
   StartSearchBidsEventHandler,
   StartSearchHrcsEventHandler,
   SuccessUploadSearchExcelFileEventHandler,
-  FailUploadSearchExcelFileEventHandler,
+  EndSearchEventHandler,
 ];
 
 @Module({
