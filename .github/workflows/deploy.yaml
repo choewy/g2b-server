@@ -3,7 +3,7 @@ name: Deploy
 on:
   push:
     tags: ['v*']
-    branches: ['master']
+    paths-ignore: ['*.md']
 
 env:
   tag: ${{ github.ref_name }}
