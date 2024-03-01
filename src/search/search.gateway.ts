@@ -1,6 +1,7 @@
 import cookie from 'cookie';
 
 import { Namespace, Socket } from 'socket.io';
+import { AsyncApiSub } from 'nestjs-asyncapi';
 
 import { OnGatewayConnection, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 
@@ -9,6 +10,8 @@ import { JwtKey } from 'src/jwt/enums';
 import { UploadedExcelFileDto } from 'src/file/dto/uploaded-excel-file.dto';
 
 import { SearchStateType } from './entities/enums';
+import { SearchEndDto } from './dto/search-end.dto';
+import { SearchCountDto } from './dto/search-count.dto';
 
 @WebSocketGateway({
   namespace: 'search',
@@ -36,15 +39,30 @@ export class SearchGateway implements OnGatewayConnection {
     return ['search', userId].join(':');
   }
 
+  @AsyncApiSub({
+    tags: [{ name: 'search:${userId}' }],
+    channel: 'count',
+    message: { payload: SearchCountDto },
+  })
   sendCount(userId: number, type: SearchStateType, count: number): void {
-    this.server.in(this.createRoom(userId)).emit('count', { type, count });
+    this.server.in(this.createRoom(userId)).emit('count', new SearchCountDto(type, count));
   }
 
+  @AsyncApiSub({
+    tags: [{ name: 'search:${userId}' }],
+    channel: 'file',
+    message: { payload: UploadedExcelFileDto },
+  })
   sendFile(userId: number, excelFile: UploadedExcelFileDto): void {
     this.server.in(this.createRoom(userId)).emit('file', excelFile);
   }
 
+  @AsyncApiSub({
+    tags: [{ name: 'search:${userId}' }],
+    channel: 'end',
+    message: { payload: SearchEndDto },
+  })
   sendEnd(userId: number, type: SearchStateType, error?: unknown): void {
-    this.server.in(this.createRoom(userId)).emit('end', { type, error });
+    this.server.in(this.createRoom(userId)).emit('end', new SearchEndDto(type, error));
   }
 }

@@ -27,7 +27,7 @@ jobs:
           node-version: ${{ matrix.node }}
 
       - name: Install dependencies
-        run: npm ci
+        run: PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true npm ci
 
       - name: Build Application
         run: npm run build
