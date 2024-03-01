@@ -16,9 +16,12 @@ export class GetKeywordsQueryHandler implements IQueryHandler<GetKeywordsQuery> 
   ) {}
 
   async execute(query: GetKeywordsQuery): Promise<KeywordDto[]> {
-    const keywords = await this.keywordRepository.findBy({
-      user: { id: query.userId },
-      type: query.query.type,
+    const keywords = await this.keywordRepository.find({
+      where: {
+        user: { id: query.userId },
+        type: query.query.type,
+      },
+      order: { createdAt: 'DESC' },
     });
 
     return keywords.map((keyword) => new KeywordDto(keyword));

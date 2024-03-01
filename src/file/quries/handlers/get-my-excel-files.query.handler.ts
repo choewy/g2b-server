@@ -21,6 +21,7 @@ export class GetMyExcelFilesQueryHandler implements IQueryHandler<GetMyExcelFile
         type: query.type,
       },
       order: { uploadedAt: 'DESC' },
+      take: 20,
     });
 
     return uploadedExcelFiles.map((uploadedExcelFile) => new UploadedExcelFileDto(uploadedExcelFile));
