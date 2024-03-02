@@ -152,6 +152,8 @@ export class SearchService {
     workSheet.getColumn(1).width = this.fixelToWidth(50);
     workSheet.getColumn(2).width = this.fixelToWidth(80);
     workSheet.getColumn(2).alignment = { vertical: 'middle', horizontal: 'center' };
+    workSheet.getColumn(3).width = this.fixelToWidth(80);
+    workSheet.getColumn(3).alignment = { vertical: 'middle', horizontal: 'center' };
     workSheet.getColumn(4).width = this.fixelToWidth(120);
     workSheet.getColumn(4).alignment = { vertical: 'middle', horizontal: 'center' };
     workSheet.getColumn(5).width = this.fixelToWidth(650);
