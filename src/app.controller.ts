@@ -9,8 +9,8 @@ export class AppController {
   constructor(private readonly appService: AppService) {}
 
   @Get()
-  @ApiOperation({ summary: 'Health Check' })
-  healthCheck(): { version: string } {
+  @ApiOperation({ summary: 'version' })
+  getVersion(): { version: string } {
     return { version: this.appService.getVersion() };
   }
 }

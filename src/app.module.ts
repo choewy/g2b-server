@@ -10,6 +10,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AppFilter } from './app.filter';
 
+import { HealthModule } from './health/health.module';
 import { FileModule } from './file/file.module';
 import { UserModule } from './user/user.module';
 import { EmailModule } from './email/email.module';
@@ -23,6 +24,7 @@ import { SearchModule } from './search/search.module';
     ConfigModule.forRoot(),
     DatabaseModule.forRoot(),
     JwtModule.forRoot(),
+    HealthModule,
     FileModule,
     UserModule,
     EmailModule,
