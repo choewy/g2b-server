@@ -21,7 +21,7 @@ export class GetKeywordsQueryHandler implements IQueryHandler<GetKeywordsQuery> 
         user: { id: query.userId },
         type: query.query.type,
       },
-      order: { createdAt: 'DESC' },
+      order: { text: 'ASC' },
     });
 
     return keywords.map((keyword) => new KeywordDto(keyword));
