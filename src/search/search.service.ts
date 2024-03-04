@@ -23,7 +23,6 @@ export class SearchService {
   private async createKeywordRegExpMap(userId: number) {
     const keywords = await this.keywordRepository.find({
       where: { user: { id: userId } },
-      order: { text: 'ASC' },
     });
 
     const includeKeywords = keywords.filter(({ type }) => type === KeywordType.Include).map(({ text }) => text);
@@ -66,7 +65,13 @@ export class SearchService {
       filteredItems.push(item);
     }
 
-    return filteredItems;
+    return filteredItems.sort((x, y) => {
+      if (x.keywords > y.keywords) {
+        return 1;
+      } else {
+        return -1;
+      }
+    });
   }
 
   async filterHrcsItems(userId: number, items: HrcsItem[]): Promise<FilteredHrcsItemDto[]> {
@@ -98,7 +103,13 @@ export class SearchService {
       filteredItems.push(item);
     }
 
-    return filteredItems;
+    return filteredItems.sort((x, y) => {
+      if (x.keywords > y.keywords) {
+        return 1;
+      } else {
+        return -1;
+      }
+    });
   }
 
   private fixelToWidth(fixel: number) {
