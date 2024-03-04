@@ -21,7 +21,11 @@ export class SearchService {
   ) {}
 
   private async createKeywordRegExpMap(userId: number) {
-    const keywords = await this.keywordRepository.findBy({ user: { id: userId } });
+    const keywords = await this.keywordRepository.find({
+      where: { user: { id: userId } },
+      order: { text: 'ASC' },
+    });
+
     const includeKeywords = keywords.filter(({ type }) => type === KeywordType.Include).map(({ text }) => text);
     const excludeKeywords = keywords.filter(({ type }) => type === KeywordType.Exclude).map(({ text }) => text);
     const includeKeywordRegExp = includeKeywords.length > 0 ? new RegExp(includeKeywords.join('|')) : null;
