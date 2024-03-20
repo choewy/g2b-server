@@ -18,7 +18,7 @@ export class MockRepository<IEntity> {
     };
   }
 
-  getRepository(module: TestingModule): Repository<IEntity> {
+  get(module: TestingModule): Repository<IEntity> {
     return module.get(this.createToken());
   }
 }
