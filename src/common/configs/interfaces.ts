@@ -2,6 +2,12 @@ import { ListenOptions } from 'net';
 
 import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
 
+import { NodeEnv } from './enums';
+
+export interface SystemOption {
+  nodeEnv: NodeEnv;
+}
+
 export interface ServerOption {
   id: string;
   listen: ListenOptions;

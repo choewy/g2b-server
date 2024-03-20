@@ -1,5 +1,6 @@
 export * from './enums';
 export * from './interfaces';
+export * from './system.config';
 export * from './server.config';
 export * from './typeorm.config';
 export * from './jwt.config';
