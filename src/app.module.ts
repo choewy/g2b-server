@@ -16,6 +16,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { EmailModule } from './email/email.module';
+import { ExcelModule } from './excel/excel.module';
+import { KeywordModule } from './keyword/keyword.module';
+import { SearchModule } from './search/search.module';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -35,6 +40,11 @@ import { AppService } from './app.service';
         return config.get(JWT_CONFIG);
       },
     }),
+    UserModule,
+    EmailModule,
+    KeywordModule,
+    SearchModule,
+    ExcelModule,
   ],
   controllers: [AppController],
   providers: [AppService],
