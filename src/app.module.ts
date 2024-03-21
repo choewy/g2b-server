@@ -16,6 +16,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { AuthModule } from './auth/auth.module';
 import { EmailModule } from './email/email.module';
 import { ExcelModule } from './excel/excel.module';
 import { KeywordModule } from './keyword/keyword.module';
@@ -35,11 +36,13 @@ import { UserModule } from './user/user.module';
       },
     }),
     JwtModule.registerAsync({
+      global: true,
       inject: [ConfigService],
       useFactory(config: ConfigService) {
         return config.get(JWT_CONFIG);
       },
     }),
+    AuthModule,
     UserModule,
     EmailModule,
     KeywordModule,
