@@ -4,12 +4,13 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 import { plainToInstance } from 'class-transformer';
+import { Response } from 'express';
 import { SignInCommand, SignUpCommand } from 'src/auth/commands';
-import { MockRepository, MockResponse } from 'test/utils';
+import { MockRepository } from 'test/utils';
 
 import { TestAuthService } from './auth.service';
 
-const response = new MockResponse();
+const response = {} as Response;
 const userRepository = new MockRepository(UserEntity);
 
 describe('AuthService', () => {
