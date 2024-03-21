@@ -40,6 +40,6 @@ export class AuthController {
   @ApiOperation({ summary: '로그아웃' })
   @ApiCreatedResponse({ type: null })
   async signout(@Res({ passthrough: true }) res: Response) {
-    return;
+    return this.authService.signOut(res);
   }
 }

@@ -121,4 +121,8 @@ export class AuthService {
 
     return new UserDto(user);
   }
+
+  async signOut(res: Response) {
+    this.deleteTokens(res);
+  }
 }

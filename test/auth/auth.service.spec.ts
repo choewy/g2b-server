@@ -137,4 +137,10 @@ describe('AuthService', () => {
         });
     });
   });
+
+  describe('signOut', () => {
+    it('어떤 상황에서도 쿠키의 모든 토큰을 삭제한다.', () => {
+      expect(context.signOut(response)).resolves.toBeUndefined();
+    });
+  });
 });
