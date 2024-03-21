@@ -1,5 +1,6 @@
-import { UserEntity } from '@common';
 import { ApiResponseProperty } from '@nestjs/swagger';
+
+import { UserEntity } from '../entities';
 
 export class UserDto {
   @ApiResponseProperty({ type: String, format: 'email' })
@@ -11,9 +12,13 @@ export class UserDto {
   @ApiResponseProperty({ type: Boolean })
   verified: boolean;
 
+  @ApiResponseProperty({ type: Date })
+  createdAt: Date;
+
   constructor(user: UserEntity) {
     this.email = user.email;
     this.name = user.name;
     this.verified = user.verified;
+    this.createdAt = user.createdAt;
   }
 }

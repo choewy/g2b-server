@@ -1,4 +1,4 @@
-import { BaseEntity, Column, Entity, JoinTable, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { BaseEntity, Column, CreateDateColumn, Entity, JoinTable, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 
 import { EmailVerificationEntity } from './email-verification.entity';
 import { ExcelEntity } from './excel.entity';
@@ -21,6 +21,12 @@ export class UserEntity extends BaseEntity {
 
   @Column({ type: 'boolean', default: false })
   verified: boolean;
+
+  @CreateDateColumn({ type: 'timestamp' })
+  readonly createdAt: Date;
+
+  @UpdateDateColumn({ type: 'timestamp' })
+  readonly updatedAt: Date;
 
   @OneToMany(() => KeywordEntity, (e) => e.user, { cascade: true })
   @JoinTable()

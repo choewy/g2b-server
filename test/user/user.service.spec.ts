@@ -1,8 +1,7 @@
-import { UserEntity } from '@common';
+import { UserDto, UserEntity } from '@common';
 import { HttpException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { plainToInstance } from 'class-transformer';
-import { UserDto } from 'src/user/dtos';
 import { UserService } from 'src/user/user.service';
 import { MockRepository } from 'test/utils';
 
@@ -28,7 +27,7 @@ describe(UserService.name, () => {
 
   describe('getUser', () => {
     it('존재하지 않는 id로 UserEntity를 조회 시 NotFoundException을 던진다.', async () => {
-      jest.spyOn(mock.userRepository.get(module), 'findOneBy').mockResolvedValue(null);
+      jest.spyOn(mock.userRepository.from(module), 'findOneBy').mockResolvedValue(null);
 
       await context.getUser(1).catch((e: HttpException) => {
         expect(e).toBeInstanceOf(NotFoundException);
@@ -39,7 +38,7 @@ describe(UserService.name, () => {
     it('UserEntity 조회 성공 시 UserDto을 반환한다.', async () => {
       const user = plainToInstance(UserEntity, { name: 'choewy' });
 
-      jest.spyOn(mock.userRepository.get(module), 'findOneBy').mockResolvedValue(user);
+      jest.spyOn(mock.userRepository.from(module), 'findOneBy').mockResolvedValue(user);
 
       await context.getUser(1).then((value) => {
         expect(value).toBeInstanceOf(UserDto);
