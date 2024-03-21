@@ -1,14 +1,15 @@
 import { CookieKey, ExceptionMessage, JWT_CONFIG, UserDto, UserEntity } from '@common';
 import { BadRequestException, ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { JwtModuleOptions, JwtService, JwtSignOptions } from '@nestjs/jwt';
+import { JwtModuleOptions, JwtService, JwtSignOptions, TokenExpiredError } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { compareSync, hashSync } from 'bcrypt';
-import { CookieOptions, Response } from 'express';
+import { CookieOptions, Request, Response } from 'express';
 import { DateTime } from 'luxon';
 import { Repository } from 'typeorm';
 
 import { SignInCommand, SignUpCommand } from './commands';
+import { UserTokenPayload, UserTokenVerifyResult } from './interfaces';
 
 @Injectable()
 export class AuthService {
@@ -27,36 +28,17 @@ export class AuthService {
   };
 
   protected createAccessToken(id: number, email: string) {
-    const jwtConfig = this.configService.get<JwtModuleOptions>(JWT_CONFIG);
-    const signOption: JwtSignOptions = { secret: jwtConfig.secret, expiresIn: '1d' };
+    const config = this.configService.get<JwtModuleOptions>(JWT_CONFIG);
+    const signOption: JwtSignOptions = { secret: config.secret, expiresIn: '1d' };
 
-    return this.jwtService.sign({ id, email }, signOption);
+    return this.jwtService.sign({ id, email } as UserTokenPayload, signOption);
   }
 
   protected createRefreshToken(id: number, email: string) {
-    const jwtConfig = this.configService.get<JwtModuleOptions>(JWT_CONFIG);
-    const signOption: JwtSignOptions = { secret: jwtConfig.secret, expiresIn: '14d' };
+    const config = this.configService.get<JwtModuleOptions>(JWT_CONFIG);
+    const signOption: JwtSignOptions = { secret: config.secret, expiresIn: '14d' };
 
-    return this.jwtService.sign({ id, email }, signOption);
-  }
-
-  protected setAccessToken(res: Response, id: number, email: string): void {
-    res.cookie(CookieKey.JwtAccessToken, this.createAccessToken(id, email), {
-      ...this.cookieOptions,
-      expires: DateTime.local().plus({ days: 1 }).toJSDate(),
-    });
-  }
-
-  protected setRefreshToken(res: Response, id: number, email: string): void {
-    res.cookie(CookieKey.JwtRefreshToken, this.createRefreshToken(id, email), {
-      ...this.cookieOptions,
-      expires: DateTime.local().plus({ days: 14 }).toJSDate(),
-    });
-  }
-
-  protected deleteTokens(res: Response) {
-    res.clearCookie(CookieKey.JwtAccessToken, this.cookieOptions);
-    res.clearCookie(CookieKey.JwtRefreshToken, this.cookieOptions);
+    return this.jwtService.sign({ id, email } as UserTokenPayload, signOption);
   }
 
   protected comparePassword(commandPassword: string, userPassword: string) {
@@ -65,6 +47,74 @@ export class AuthService {
 
   protected hashingPassword(commandPassword: string) {
     return hashSync(commandPassword, 10);
+  }
+
+  setAccessToken(res: Response, id: number, email: string): void {
+    res.cookie(CookieKey.JwtAccessToken, this.createAccessToken(id, email), {
+      ...this.cookieOptions,
+      expires: DateTime.local().plus({ days: 1 }).toJSDate(),
+    });
+  }
+
+  setRefreshToken(res: Response, id: number, email: string): void {
+    res.cookie(CookieKey.JwtRefreshToken, this.createRefreshToken(id, email), {
+      ...this.cookieOptions,
+      expires: DateTime.local().plus({ days: 14 }).toJSDate(),
+    });
+  }
+
+  deleteTokens(res: Response) {
+    res.clearCookie(CookieKey.JwtAccessToken, this.cookieOptions);
+    res.clearCookie(CookieKey.JwtRefreshToken, this.cookieOptions);
+  }
+
+  verifyAccessToken(req: Request) {
+    const config = this.configService.get<JwtModuleOptions>(JWT_CONFIG);
+
+    const token = req.cookies[CookieKey.JwtAccessToken];
+    const result: UserTokenVerifyResult = {
+      user: null,
+      error: null,
+      expired: false,
+    };
+
+    try {
+      result.user = this.jwtService.verify(token, { secret: config.secret });
+    } catch (e) {
+      if (e instanceof TokenExpiredError) {
+        result.expired = true;
+      } else {
+        result.error = e;
+      }
+    }
+
+    if (result.expired) {
+      try {
+        result.user = this.jwtService.verify(token, { secret: config.secret, ignoreExpiration: true });
+      } catch (e) {
+        result.error = e;
+      }
+    }
+
+    return result;
+  }
+
+  verifyRefreshToken(req: Request) {
+    const config = this.configService.get<JwtModuleOptions>(JWT_CONFIG);
+    const result: UserTokenVerifyResult = {
+      user: null,
+      error: null,
+      expired: false,
+    };
+
+    try {
+      const token = req.cookies[CookieKey.JwtRefreshToken];
+      result.user = this.jwtService.verify(token, { secret: config.secret });
+    } catch (e) {
+      result.error = e;
+    }
+
+    return result;
   }
 
   async getUser(res: Response, id: number) {

@@ -1,7 +1,6 @@
 import {
   AwsConfig,
   EmailConfig,
-  JWT_CONFIG,
   JwtConfig,
   OpenApiConfig,
   ServerConfig,
@@ -11,7 +10,6 @@ import {
 } from '@common/configs';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { AppController } from './app.controller';
@@ -21,7 +19,6 @@ import { EmailModule } from './email/email.module';
 import { ExcelModule } from './excel/excel.module';
 import { KeywordModule } from './keyword/keyword.module';
 import { SearchModule } from './search/search.module';
-import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -35,15 +32,7 @@ import { UserModule } from './user/user.module';
         return config.get(TYPEORM_CONFIG);
       },
     }),
-    JwtModule.registerAsync({
-      global: true,
-      inject: [ConfigService],
-      useFactory(config: ConfigService) {
-        return config.get(JWT_CONFIG);
-      },
-    }),
-    AuthModule,
-    UserModule,
+    AuthModule.forRoot(),
     EmailModule,
     KeywordModule,
     SearchModule,

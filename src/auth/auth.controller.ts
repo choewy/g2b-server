@@ -1,25 +1,25 @@
 import { UserDto } from '@common';
-import { Body, Controller, Get, Post, Res } from '@nestjs/common';
+import { Body, Controller, Get, Post, Res, UseGuards } from '@nestjs/common';
 import { ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Response } from 'express';
 
 import { AuthService } from './auth.service';
 import { SignInCommand, SignUpCommand } from './commands';
+import { ReqUser } from './decorators';
+import { JwtAuthGuard } from './guards';
+import { UserTokenPayload } from './interfaces';
 
 @ApiTags('인증/인가')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  /**
-   * @TODO guard
-   * @TODO params(id)
-   * */
   @Get()
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: '인가' })
   @ApiOkResponse({ type: UserDto })
-  async auth(@Res({ passthrough: true }) res: Response) {
-    return this.authService.getUser(res, 1);
+  async auth(@Res({ passthrough: true }) res: Response, @ReqUser() user: UserTokenPayload) {
+    return this.authService.getUser(res, user.id);
   }
 
   @Post('signin')
