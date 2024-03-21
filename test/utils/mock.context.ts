@@ -10,6 +10,9 @@ export class MockContext {
       getNext: jest.fn(),
     });
 
+    ctx.getClass = () => jest.fn();
+    ctx.getHandler = () => jest.fn();
+
     return ctx;
   }
 }

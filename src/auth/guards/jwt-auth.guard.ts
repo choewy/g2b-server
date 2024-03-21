@@ -1,12 +1,14 @@
 import { ExceptionMessage } from '@common';
 import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
 import { Request, Response } from 'express';
 
 import { AuthService } from '../auth.service';
+import { IGNORE_JWT_GUARD_ERROR } from '../decorators';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly reflector: Reflector, private readonly authService: AuthService) {}
 
   canActivate(context: ExecutionContext): boolean {
     const req = context.switchToHttp().getRequest<Request>();
@@ -15,6 +17,12 @@ export class JwtAuthGuard implements CanActivate {
     const accessTokenResult = this.authService.verifyAccessToken(req);
 
     if (accessTokenResult.error || accessTokenResult.user === null) {
+      const ignoreJwtGuardError = this.reflector.getAllAndOverride(IGNORE_JWT_GUARD_ERROR, [context.getClass(), context.getHandler()]);
+
+      if (ignoreJwtGuardError === true) {
+        return true;
+      }
+
       this.authService.deleteTokens(res);
       throw new UnauthorizedException(ExceptionMessage.FailAuth, {
         cause: {

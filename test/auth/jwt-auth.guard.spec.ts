@@ -1,13 +1,14 @@
 import { ExceptionMessage, UserEntity } from '@common';
 import { HttpException, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { Reflector } from '@nestjs/core';
 import { JsonWebTokenError, JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
+import { AuthService } from 'src/auth/auth.service';
 import { JwtAuthGuard } from 'src/auth/guards';
 import { MockContext, MockRepository } from 'test/utils';
 
 import { TestAuthService } from './auth.service';
-import { AuthService } from 'src/auth/auth.service';
 
 const context = new MockContext().createExecutionContext();
 
@@ -20,6 +21,7 @@ describe('JwtAuthGuard', () => {
     module = await Test.createTestingModule({
       providers: [
         JwtAuthGuard,
+        Reflector,
         new MockRepository(UserEntity).createProvider(),
         {
           provide: AuthService,
@@ -35,6 +37,7 @@ describe('JwtAuthGuard', () => {
   });
 
   beforeEach(() => {
+    jest.spyOn(module.get(Reflector), 'getAllAndOverride').mockClear();
     jest.spyOn(service, 'deleteTokens').mockClear();
     jest.spyOn(service, 'setAccessToken').mockClear();
     jest.spyOn(service, 'setRefreshToken').mockClear();
@@ -75,6 +78,14 @@ describe('JwtAuthGuard', () => {
         expect(exeption.getStatus()).toBe(401);
         expect(exeption.message).toBe(ExceptionMessage.FailAuth);
       }
+    });
+
+    it('accessToken 검증이 실패(error가 발생하거나, user가 null인 경우)하였으나, IgnoreJwtGuardError가 활성화되어 있으면 true를 반환한다.', () => {
+      jest.spyOn(service, 'verifyAccessToken').mockReturnValue({ user: null, error: null, expired: false });
+      jest.spyOn(module.get(Reflector), 'getAllAndOverride').mockReturnValue(true);
+
+      expect(guard.canActivate(context)).toBeTruthy();
+      expect(jest.spyOn(module.get(Reflector), 'getAllAndOverride')).toHaveBeenCalledTimes(1);
     });
 
     it('accessToken 검증 성공 시 true를 반환한다.', () => {
