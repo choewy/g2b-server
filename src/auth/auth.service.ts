@@ -1,14 +1,14 @@
 import { CookieKey, ExceptionMessage, JWT_CONFIG, UserDto, UserEntity } from '@common';
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtModuleOptions, JwtService, JwtSignOptions } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
-import { compareSync } from 'bcrypt';
+import { compareSync, hashSync } from 'bcrypt';
 import { CookieOptions, Response } from 'express';
 import { DateTime } from 'luxon';
 import { Repository } from 'typeorm';
 
-import { SignInCommand } from './commands';
+import { SignInCommand, SignUpCommand } from './commands';
 
 @Injectable()
 export class AuthService {
@@ -63,6 +63,10 @@ export class AuthService {
     return compareSync(commandPassword, userPassword);
   }
 
+  protected hashingPassword(commandPassword: string) {
+    return hashSync(commandPassword, 10);
+  }
+
   async getUser(res: Response, id: number) {
     const user = await this.userRepository.findOneBy({ id });
 
@@ -87,6 +91,33 @@ export class AuthService {
 
     this.setAccessToken(res, user.id, user.email);
     this.setRefreshToken(res, user.id, user.email);
+
+    return new UserDto(user);
+  }
+
+  async signUp(res: Response, command: SignUpCommand) {
+    if (command.password !== command.confirmPassword) {
+      throw new BadRequestException(ExceptionMessage.IncorrectPasswords);
+    }
+
+    if (await this.userRepository.existsBy({ email: command.email })) {
+      throw new ConflictException(ExceptionMessage.AlreadyExistAccount);
+    }
+
+    const user = new UserEntity({
+      name: command.name,
+      email: command.email,
+      password: this.hashingPassword(command.password),
+    });
+
+    await this.userRepository.insert(user);
+
+    this.setAccessToken(res, user.id, user.email);
+    this.setRefreshToken(res, user.id, user.email);
+
+    /**
+     * @TODO 인증메일 발송
+     **/
 
     return new UserDto(user);
   }

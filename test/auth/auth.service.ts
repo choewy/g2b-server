@@ -16,6 +16,10 @@ export class TestAuthService extends AuthService {
     return true;
   }
 
+  hashingPassword(commandPassword: string): string {
+    return '';
+  }
+
   setAccessToken(res: Response<any, Record<string, any>>, id: number, email: string): void {
     return;
   }

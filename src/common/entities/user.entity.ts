@@ -1,4 +1,14 @@
-import { BaseEntity, Column, CreateDateColumn, Entity, JoinTable, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import {
+  BaseEntity,
+  Column,
+  CreateDateColumn,
+  DeepPartial,
+  Entity,
+  JoinTable,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 import { EmailVerificationEntity } from './email-verification.entity';
 import { ExcelEntity } from './excel.entity';
@@ -43,4 +53,14 @@ export class UserEntity extends BaseEntity {
   @OneToMany(() => EmailVerificationEntity, (e) => e.user, { cascade: true })
   @JoinTable()
   emailVerifications: EmailVerificationEntity[];
+
+  constructor(args?: DeepPartial<Pick<UserEntity, 'password' | 'email' | 'name'>>) {
+    super();
+
+    if (args) {
+      this.email = args.email;
+      this.name = args.name;
+      this.password = args.password;
+    }
+  }
 }

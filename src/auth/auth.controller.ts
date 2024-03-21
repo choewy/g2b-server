@@ -33,7 +33,7 @@ export class AuthController {
   @ApiOperation({ summary: '회원가입' })
   @ApiCreatedResponse({ type: UserDto })
   async signup(@Res({ passthrough: true }) res: Response, @Body() command: SignUpCommand) {
-    return;
+    return this.authService.signUp(res, command);
   }
 
   @Post('signout')

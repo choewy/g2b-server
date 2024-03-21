@@ -1,10 +1,10 @@
 import { ExceptionMessage, UserDto, UserEntity } from '@common';
-import { HttpException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ConflictException, HttpException, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 import { plainToInstance } from 'class-transformer';
-import { SignInCommand } from 'src/auth/commands';
+import { SignInCommand, SignUpCommand } from 'src/auth/commands';
 import { MockRepository, MockResponse } from 'test/utils';
 
 import { TestAuthService } from './auth.service';
@@ -23,16 +23,22 @@ describe('AuthService', () => {
     context = module.get(TestAuthService);
   });
 
+  beforeEach(() => {
+    jest.spyOn(userRepository.from(module), 'findOneBy').mockClear();
+    jest.spyOn(userRepository.from(module), 'existsBy').mockClear();
+    jest.spyOn(userRepository.from(module), 'insert').mockClear();
+    jest.spyOn(context, 'comparePassword').mockClear();
+    jest.spyOn(context, 'hashingPassword').mockClear();
+    jest.spyOn(context, 'setAccessToken').mockClear();
+    jest.spyOn(context, 'setRefreshToken').mockClear();
+    jest.spyOn(context, 'deleteTokens').mockClear();
+  });
+
   it('AuthService가 정의되어 있어야 한다.', () => {
     expect(context).toBeDefined();
   });
 
   describe('getUser', () => {
-    beforeEach(() => {
-      jest.spyOn(userRepository.from(module), 'findOneBy').mockClear();
-      jest.spyOn(context, 'deleteTokens').mockClear();
-    });
-
     it('id가 1인 UserEntity가 없으면 Cookie의 모든 토큰을 삭제한 후 UnauthorizedException을 던진다.', async () => {
       jest.spyOn(userRepository.from(module), 'findOneBy').mockResolvedValue(null);
 
@@ -56,14 +62,7 @@ describe('AuthService', () => {
     });
   });
 
-  describe('signin', () => {
-    beforeEach(() => {
-      jest.spyOn(userRepository.from(module), 'findOneBy').mockClear();
-      jest.spyOn(context, 'comparePassword').mockClear();
-      jest.spyOn(context, 'setAccessToken').mockClear();
-      jest.spyOn(context, 'setRefreshToken').mockClear();
-    });
-
+  describe('signIn', () => {
     it('email이 test@example.com인 UserEntity가 없으면 UnauthorizedException을 던진다.', async () => {
       jest.spyOn(userRepository.from(module), 'findOneBy').mockResolvedValue(null);
 
@@ -100,6 +99,41 @@ describe('AuthService', () => {
           expect(jest.spyOn(context, 'setAccessToken')).toHaveBeenCalledTimes(1);
           expect(jest.spyOn(context, 'setRefreshToken')).toHaveBeenCalledTimes(1);
           expect(dto).toBeInstanceOf(UserDto);
+        });
+    });
+  });
+
+  describe('signUp', () => {
+    it('password와 confirmPassword가 다르면 BadRequestException을 던진다.', async () => {
+      await context.signUp(response, plainToInstance(SignUpCommand, { password: 'a', confirmPassword: 'b' })).catch((e: HttpException) => {
+        expect(e).toBeInstanceOf(BadRequestException);
+        expect(e.getStatus()).toBe(400);
+        expect(e.message).toBe(ExceptionMessage.IncorrectPasswords);
+      });
+    });
+
+    it('test@example.com이 이미 등록된 계정이면 ConflictException을 던진다.', async () => {
+      jest.spyOn(userRepository.from(module), 'existsBy').mockResolvedValue(true);
+
+      await context
+        .signUp(response, plainToInstance(SignUpCommand, { email: 'test@example.com', password: 'a', confirmPassword: 'a' }))
+        .catch((e: HttpException) => {
+          expect(e).toBeInstanceOf(ConflictException);
+          expect(e.getStatus()).toBe(409);
+          expect(e.message).toBe(ExceptionMessage.AlreadyExistAccount);
+        });
+    });
+
+    it('회원가입이 성공하면 accessToken과 refreshToken을 Cookie에 등록하고, UserDto를 반환한다.', async () => {
+      jest.spyOn(userRepository.from(module), 'existsBy').mockResolvedValue(false);
+      jest.spyOn(userRepository.from(module), 'insert').mockResolvedValue({ raw: {}, identifiers: [], generatedMaps: [] });
+
+      await context
+        .signUp(response, plainToInstance(SignUpCommand, { email: 'test@example.com', name: 'test', password: 'a', confirmPassword: 'a' }))
+        .then((e) => {
+          expect(jest.spyOn(context, 'setAccessToken')).toHaveBeenCalledTimes(1);
+          expect(jest.spyOn(context, 'setRefreshToken')).toHaveBeenCalledTimes(1);
+          expect(e).toBeInstanceOf(UserDto);
         });
     });
   });

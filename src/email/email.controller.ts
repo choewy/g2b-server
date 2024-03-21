@@ -1,4 +1,14 @@
-import { Controller } from '@nestjs/common';
+import { Controller, Post } from '@nestjs/common';
 
 @Controller('email')
-export class EmailController {}
+export class EmailController {
+  @Post()
+  async sendEmail() {
+    return;
+  }
+
+  @Post('verify')
+  async verifyEmail() {
+    return;
+  }
+}
