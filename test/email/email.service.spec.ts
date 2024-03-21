@@ -1,21 +1,36 @@
-import { EmailVerificationEntity, EmailVerificationType } from '@common';
+import { EmailVerificationEntity, UserEntity } from '@common';
+import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 import { plainToInstance } from 'class-transformer';
 import { DateTime } from 'luxon';
-import { EmailService } from 'src/email/email.service';
+import { AuthService } from 'src/auth/auth.service';
+import { TestAuthService } from 'test/auth/auth.service';
 import { MockRepository } from 'test/utils';
+import { DataSource } from 'typeorm';
 
+import { TestEmailService } from './email.service';
+
+const userRepository = new MockRepository(UserEntity);
 const emailVerificationRepository = new MockRepository(EmailVerificationEntity);
 
 describe('EmailService', () => {
   let module: TestingModule;
-  let service: EmailService;
+  let service: TestEmailService;
 
   beforeAll(async () => {
     module = await Test.createTestingModule({
-      providers: [emailVerificationRepository.createProvider(), EmailService],
+      providers: [
+        TestEmailService,
+        userRepository.createProvider(),
+        emailVerificationRepository.createProvider(),
+        ConfigService,
+        JwtService,
+        { provide: AuthService, useClass: TestAuthService },
+        { provide: DataSource, useValue: { transaction: jest.fn() } },
+      ],
     }).compile();
-    service = module.get(EmailService);
+    service = module.get(TestEmailService);
   });
 
   it('EmailService가 정의되어 있어야 한다.', () => {
@@ -26,7 +41,7 @@ describe('EmailService', () => {
     it('이메일 인증을 진행하지 않은 경우 0을 반환한다.', async () => {
       jest.spyOn(emailVerificationRepository.from(module), 'findOneBy').mockResolvedValue(null);
 
-      const seconds = await service.getEmailExpiresIn(1, EmailVerificationType.Signup);
+      const seconds = await service.getEmailExpiresIn(1);
 
       expect(seconds === 0).toBeTruthy();
     });
@@ -38,7 +53,7 @@ describe('EmailService', () => {
         }),
       );
 
-      const seconds = await service.getEmailExpiresIn(1, EmailVerificationType.Signup);
+      const seconds = await service.getEmailExpiresIn(1);
 
       expect(seconds > 0).toBeTruthy();
     });
@@ -50,7 +65,7 @@ describe('EmailService', () => {
         }),
       );
 
-      const seconds = await service.getEmailExpiresIn(1, EmailVerificationType.Signup);
+      const seconds = await service.getEmailExpiresIn(1);
 
       expect(seconds < 0).toBeTruthy();
     });

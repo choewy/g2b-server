@@ -45,7 +45,7 @@ export class AuthService {
     return compareSync(commandPassword, userPassword);
   }
 
-  protected hashingPassword(commandPassword: string) {
+  hashingPassword(commandPassword: string) {
     return hashSync(commandPassword, 10);
   }
 
@@ -174,5 +174,11 @@ export class AuthService {
 
   async signOut(res: Response) {
     this.deleteTokens(res);
+  }
+
+  async updatePassword(user: UserEntity, password: string) {
+    user.password = this.hashingPassword(password);
+    await this.userRepository.update(user.id, user);
+    return user;
   }
 }
