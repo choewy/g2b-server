@@ -3,6 +3,7 @@ import { Column, CreateDateColumn, Entity, Index, JoinColumn, ManyToOne, Primary
 import { EmailVerificationType } from './enums';
 import { UserEntity } from './user.entity';
 
+@Index('email_verification_idx_user_type', ['user.id', 'type'])
 @Index('email_verification_idx_type_code', ['type', 'code'])
 @Entity({ name: 'email_verification' })
 export class EmailVerificationEntity {
