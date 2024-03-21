@@ -3,20 +3,31 @@ import { HttpException, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JsonWebTokenError, JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
-import { AuthService } from 'src/auth/auth.service';
 import { JwtAuthGuard } from 'src/auth/guards';
 import { MockContext, MockRepository } from 'test/utils';
+
+import { TestAuthService } from './auth.service';
+import { AuthService } from 'src/auth/auth.service';
 
 const context = new MockContext().createExecutionContext();
 
 describe('JwtAuthGuard', () => {
   let module: TestingModule;
-  let service: AuthService;
+  let service: TestAuthService;
   let guard: JwtAuthGuard;
 
   beforeAll(async () => {
     module = await Test.createTestingModule({
-      providers: [JwtAuthGuard, new MockRepository(UserEntity).createProvider(), AuthService, ConfigService, JwtService],
+      providers: [
+        JwtAuthGuard,
+        new MockRepository(UserEntity).createProvider(),
+        {
+          provide: AuthService,
+          useClass: TestAuthService,
+        },
+        ConfigService,
+        JwtService,
+      ],
     }).compile();
 
     service = module.get(AuthService);
@@ -29,10 +40,6 @@ describe('JwtAuthGuard', () => {
     jest.spyOn(service, 'setRefreshToken').mockClear();
     jest.spyOn(service, 'verifyAccessToken').mockClear();
     jest.spyOn(service, 'verifyRefreshToken').mockClear();
-
-    jest.spyOn(service, 'deleteTokens').mockReturnValue();
-    jest.spyOn(service, 'setAccessToken').mockReturnValue();
-    jest.spyOn(service, 'setRefreshToken').mockReturnValue();
   });
 
   it('JwtAuthGuard가 정의되어 있어야 한다.', () => {
