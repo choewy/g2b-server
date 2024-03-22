@@ -32,7 +32,7 @@ export class SearchController {
   @Post('hrcs')
   @ApiOperation({ summary: '사전규격 검색 시작' })
   @ApiCreatedResponse({ type: SearchDto })
-  async startHrcsSearc(@ReqUser() user: UserTokenPayload, @Body() command: StartHrcsSearchCommand) {
+  async startHrcsSearch(@ReqUser() user: UserTokenPayload, @Body() command: StartHrcsSearchCommand) {
     return this.searchService.startHrcsSearch(user.id, command);
   }
 }

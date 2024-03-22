@@ -28,10 +28,13 @@ export class SearchEntity extends BaseEntity {
   @Column({ type: 'varchar', length: 50 })
   processId: string;
 
-  @CreateDateColumn()
+  @Column({ type: 'text', nullable: true })
+  error: string | null;
+
+  @CreateDateColumn({ type: 'timestamp' })
   readonly startedAt: Date;
 
-  @DeleteDateColumn()
+  @DeleteDateColumn({ type: 'timestamp' })
   readonly endedAt: Date | null;
 
   @ManyToOne(() => UserEntity, (e) => e.searches, { onDelete: 'CASCADE' })

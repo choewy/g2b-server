@@ -22,7 +22,7 @@ export class SearchModule implements OnModuleDestroy {
     const searches = await this.searchService.getSearchesByProcessId();
 
     if (searches.length > 0) {
-      await this.searchService.deleteSearchesByProcessId();
+      await this.searchService.deleteSearchesByProcessId(error);
     }
 
     for (const search of searches) {

@@ -21,7 +21,7 @@ export class SearchEventHandler {
 
   @OnEvent(SendSearchEndEvent)
   async handleSendSearchEndEvent(event: SendSearchEndEvent) {
-    await this.searchService.deleteSearch(event.userId, event.result.type);
+    await this.searchService.deleteSearch(event.userId, event.result.type, event.result.error);
     this.searchGateway.sendSearchEnd(event.userId, event.result);
   }
 }

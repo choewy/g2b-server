@@ -1,5 +1,5 @@
 import { EventPublisher } from '@choewy/nestjs-event';
-import { ExcelDto, KeywordEntity, KeywordType, OPEN_API_CONFIG, OpenApiOption, SearchType } from '@common';
+import { KeywordEntity, KeywordType, OPEN_API_CONFIG, OpenApiOption, SearchType } from '@common';
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -191,30 +191,28 @@ export class OpenApiService {
   }
 
   async run(userId: number, type: SearchType, types: number[], startDate: string, endDate: string) {
-    const items = await this.getItems(type, types, startDate, endDate);
-    const itemsCount = items.length;
+    const result = new OpenApiEndDto(type);
 
-    const regExp = await this.createKeywordRegExp(userId);
-    const filteredItems = this.filterItems(type, items, regExp);
-    const filteredItemsCount = filteredItems.length;
+    try {
+      const items = await this.getItems(type, types, startDate, endDate);
+      const itemsCount = items.length;
 
-    const counts = new OpenApiItemCountsDto(type, itemsCount, filteredItemsCount);
-    await this.eventPublisher.publish(new SendSearchCountsEvent(userId, counts));
+      const regExp = await this.createKeywordRegExp(userId);
+      const filteredItems = this.filterItems(type, items, regExp);
+      const filteredItemsCount = filteredItems.length;
 
-    let excel: ExcelDto = null;
-    let error: Error = null;
+      const counts = new OpenApiItemCountsDto(type, itemsCount, filteredItemsCount);
+      await this.eventPublisher.publish(new SendSearchCountsEvent(userId, counts));
 
-    if (filteredItemsCount > 0) {
-      const createExcelResult = await this.eventPublisher.publish(new CreateExcelEvent(userId, type, filteredItems, startDate, endDate));
-      excel = createExcelResult.getFirstValue();
-      error = createExcelResult.getFirstError();
+      if (filteredItemsCount > 0) {
+        const createExcelEvent = new CreateExcelEvent(userId, type, filteredItems, startDate, endDate);
+        const createExcelResult = await this.eventPublisher.publish(createExcelEvent, { throwError: true });
+        await this.eventPublisher.publish(new SendSearchExcelEvent(userId, createExcelResult.getFirstValue()));
+      }
+    } catch (e) {
+      result.error = e;
+    } finally {
+      await this.eventPublisher.publish(new SendSearchEndEvent(userId, result));
     }
-
-    if (excel) {
-      await this.eventPublisher.publish(new SendSearchExcelEvent(userId, excel));
-    }
-
-    const result = new OpenApiEndDto(type, error);
-    await this.eventPublisher.publish(new SendSearchEndEvent(userId, result));
   }
 }

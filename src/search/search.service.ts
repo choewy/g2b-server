@@ -28,10 +28,20 @@ export class SearchService {
     });
   }
 
-  async deleteSearchesByProcessId() {
+  async deleteSearchesByProcessId(error: Error) {
     const config = this.configService.get<SystemOption>(SYSTEM_CONFIG);
 
-    await this.searchRepository.delete({ processId: config.processId });
+    await this.searchRepository.update(
+      { processId: config.processId },
+      {
+        endedAt: new Date(),
+        error: JSON.stringify({
+          name: error.name,
+          message: error.message,
+          cause: error.cause,
+        }),
+      },
+    );
   }
 
   async getSearch(userId: number, query: GetSearchQuery) {
@@ -77,7 +87,21 @@ export class SearchService {
     return new SearchDto(search);
   }
 
-  async deleteSearch(userId: number, type: SearchType) {
-    await this.searchRepository.softDelete({ user: { id: userId }, type });
+  async deleteSearch(userId: number, type: SearchType, error?: Error) {
+    if (error) {
+      await this.searchRepository.update(
+        { user: { id: userId }, type },
+        {
+          endedAt: new Date(),
+          error: JSON.stringify({
+            name: error.name,
+            message: error.message,
+            cause: error.cause,
+          }),
+        },
+      );
+    } else {
+      await this.searchRepository.softDelete({ user: { id: userId }, type });
+    }
   }
 }

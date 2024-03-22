@@ -1,7 +1,6 @@
 import { EventPublisher } from '@choewy/nestjs-event';
 import { CookieKey, ExcelDto } from '@common';
-import { Injectable } from '@nestjs/common';
-import { OnGatewayConnection, WebSocketServer } from '@nestjs/websockets';
+import { OnGatewayConnection, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import cookie from 'cookie';
 import { AsyncApiSub } from 'nestjs-asyncapi';
 import { Namespace, Socket } from 'socket.io';
@@ -9,7 +8,7 @@ import { VerifyAccessTokenWithIgnoreExpirationEvent } from 'src/auth/events';
 import { UserTokenVerifyResult } from 'src/auth/interfaces';
 import { OpenApiEndDto, OpenApiItemCountsDto } from 'src/openapi/dtos';
 
-@Injectable()
+@WebSocketGateway({ namespace: 'search', transports: ['websocket'] })
 export class SearchGateway implements OnGatewayConnection {
   @WebSocketServer()
   private readonly server: Namespace;

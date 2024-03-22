@@ -1,4 +1,5 @@
 import { SearchType } from '@common';
+import { AxiosError } from 'axios';
 
 export class OpenApiError extends Error {
   constructor(type: SearchType, e: unknown) {
@@ -21,6 +22,10 @@ export class OpenApiError extends Error {
         name: e.name,
         message: e.message,
       };
+    }
+
+    if (e instanceof AxiosError) {
+      this.cause = e.response?.data ?? this.cause;
     }
   }
 }
