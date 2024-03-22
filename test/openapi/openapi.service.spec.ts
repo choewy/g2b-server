@@ -1,3 +1,4 @@
+import { EventPublisher } from '@choewy/nestjs-event';
 import { KeywordEntity } from '@common';
 import { HttpModule } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
@@ -15,7 +16,12 @@ describe('OpenApiService', () => {
   beforeAll(async () => {
     module = await Test.createTestingModule({
       imports: [HttpModule],
-      providers: [TestOpenApiService, ConfigService, keywordRepository.createProvider()],
+      providers: [
+        TestOpenApiService,
+        ConfigService,
+        keywordRepository.createProvider(),
+        { provide: EventPublisher, useValue: { publish: jest.fn() } },
+      ],
     }).compile();
 
     service = module.get(TestOpenApiService);

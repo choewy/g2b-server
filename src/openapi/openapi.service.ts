@@ -1,11 +1,15 @@
-import { KeywordEntity, KeywordType, OPEN_API_CONFIG, OpenApiOption, SearchType } from '@common';
+import { EventPublisher } from '@choewy/nestjs-event';
+import { ExcelDto, KeywordEntity, KeywordType, OPEN_API_CONFIG, OpenApiOption, SearchType } from '@common';
 import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { lastValueFrom } from 'rxjs';
+import { CreateExcelEvent } from 'src/excel/events';
+import { SendSearchCountsEvent, SendSearchEndEvent, SendSearchExcelEvent } from 'src/search/events';
 import { Repository } from 'typeorm';
 
+import { OpenApiEndDto, OpenApiItemCountsDto } from './dtos';
 import { OpenApiBidsFilteredItem, OpenApiError, OpenApiHrcsFilteredItem, OpenApiParams } from './implements';
 import { OpenApiBidsItem, OpenApiEndPoint, OpenApiFilterRegExp, OpenApiHrcsItem, OpenApiResponse } from './interfaces';
 
@@ -14,6 +18,7 @@ export class OpenApiService {
   constructor(
     private readonly configService: ConfigService,
     private readonly httpService: HttpService,
+    private readonly eventPublisher: EventPublisher,
     @InjectRepository(KeywordEntity)
     private readonly keywordRepository: Repository<KeywordEntity>,
   ) {}
@@ -193,8 +198,23 @@ export class OpenApiService {
     const filteredItems = this.filterItems(type, items, regExp);
     const filteredItemsCount = filteredItems.length;
 
-    /** @TODO with event :: send itemsCount, filteredItemCount */
-    /** @TODO with event :: create excel file --> upload */
-    /** @TODO with event :: send excelfile or end signal */
+    const counts = new OpenApiItemCountsDto(type, itemsCount, filteredItemsCount);
+    await this.eventPublisher.publish(new SendSearchCountsEvent(userId, counts));
+
+    let excel: ExcelDto = null;
+    let error: Error = null;
+
+    if (filteredItemsCount > 0) {
+      const createExcelResult = await this.eventPublisher.publish(new CreateExcelEvent(userId, type, filteredItems, startDate, endDate));
+      excel = createExcelResult.getFirstValue();
+      error = createExcelResult.getFirstError();
+    }
+
+    if (excel) {
+      await this.eventPublisher.publish(new SendSearchExcelEvent(userId, excel));
+    }
+
+    const result = new OpenApiEndDto(type, error);
+    await this.eventPublisher.publish(new SendSearchEndEvent(userId, result));
   }
 }

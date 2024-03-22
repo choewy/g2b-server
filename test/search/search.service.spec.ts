@@ -1,11 +1,12 @@
+import { EventPublisher } from '@choewy/nestjs-event';
 import { SearchDto, SearchEntity } from '@common';
 import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
+import { plainToInstance } from 'class-transformer';
+import { GetSearchQuery } from 'src/search/queries';
 import { MockRepository } from 'test/utils';
 
 import { TestSearchService } from './search.service';
-import { plainToInstance } from 'class-transformer';
-import { GetSearchQuery } from 'src/search/queries';
 
 const searchRepository = new MockRepository(SearchEntity);
 
@@ -15,7 +16,12 @@ describe('ServiceService', () => {
 
   beforeAll(async () => {
     module = await Test.createTestingModule({
-      providers: [TestSearchService, searchRepository.createProvider(), ConfigService],
+      providers: [
+        TestSearchService,
+        ConfigService,
+        { provide: EventPublisher, useValue: { publish: jest.fn() } },
+        searchRepository.createProvider(),
+      ],
     }).compile();
 
     service = module.get(TestSearchService);
@@ -36,6 +42,18 @@ describe('ServiceService', () => {
       jest.spyOn(searchRepository.from(module), 'findOneBy').mockResolvedValue(new SearchEntity());
 
       expect(service.getSearch(1, plainToInstance(GetSearchQuery, {}))).resolves.toBeInstanceOf(SearchDto);
+    });
+  });
+
+  describe('startBidsSearch', () => {
+    it('', () => {
+      expect(1).toBe(1);
+    });
+  });
+
+  describe('startHrcsSearch', () => {
+    it('', () => {
+      expect(1).toBe(1);
     });
   });
 });
