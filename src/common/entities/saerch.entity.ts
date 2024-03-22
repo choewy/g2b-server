@@ -34,9 +34,9 @@ export class SearchEntity extends BaseEntity {
   @DeleteDateColumn()
   readonly endedAt: Date | null;
 
-  @ManyToOne(() => UserEntity, (e) => e.searches, { nullable: true, onDelete: 'CASCADE' })
+  @ManyToOne(() => UserEntity, (e) => e.searches, { onDelete: 'CASCADE' })
   @JoinColumn()
-  user: UserEntity | null;
+  user: UserEntity;
 
   constructor(args?: DeepPartial<Pick<SearchEntity, 'type' | 'processId'>> & { userId: number }) {
     super();

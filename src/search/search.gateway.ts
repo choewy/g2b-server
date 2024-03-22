@@ -1,6 +1,6 @@
 import { EventPublisher } from '@choewy/nestjs-event';
 import { CookieKey, ExcelDto } from '@common';
-import { Injectable } from '@nestjs/common';
+import { Injectable, OnModuleDestroy } from '@nestjs/common';
 import { OnGatewayConnection, WebSocketServer } from '@nestjs/websockets';
 import cookie from 'cookie';
 import { AsyncApiSub } from 'nestjs-asyncapi';
@@ -9,15 +9,30 @@ import { VerifyAccessTokenWithIgnoreExpirationEvent } from 'src/auth/events';
 import { UserTokenVerifyResult } from 'src/auth/interfaces';
 import { OpenApiEndDto, OpenApiItemCountsDto } from 'src/openapi/dtos';
 
+import { SearchGatewayDownError } from './implements';
+import { SearchService } from './search.service';
+
 @Injectable()
-export class SearchGateway implements OnGatewayConnection {
+export class SearchGateway implements OnGatewayConnection, OnModuleDestroy {
   @WebSocketServer()
   private readonly server: Namespace;
 
-  constructor(private readonly eventPublisher: EventPublisher) {}
+  constructor(private readonly eventPublisher: EventPublisher, private readonly searchService: SearchService) {}
 
-  createRoom(userId: number): string {
-    return ['search', userId].join(':');
+  async onModuleDestroy() {
+    const error = new SearchGatewayDownError();
+    const searches = await this.searchService.getSearchesByProcessId();
+
+    if (searches.length === 0) {
+      return;
+    }
+
+    await this.searchService.deleteSearchesByProcessId();
+
+    for (const search of searches) {
+      const result = new OpenApiEndDto(search.type, error);
+      this.sendSearchEnd(search.user.id, result);
+    }
   }
 
   async handleConnection(client: Socket): Promise<void> {
@@ -31,6 +46,10 @@ export class SearchGateway implements OnGatewayConnection {
     } else {
       await client.join(this.createRoom(accessTokenResult.user.id));
     }
+  }
+
+  protected createRoom(userId: number): string {
+    return ['search', userId].join(':');
   }
 
   @AsyncApiSub({

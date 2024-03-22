@@ -18,6 +18,22 @@ export class SearchService {
     private readonly searchRepository: Repository<SearchEntity>,
   ) {}
 
+  async getSearchesByProcessId() {
+    const config = this.configService.get<SystemOption>(SYSTEM_CONFIG);
+
+    return this.searchRepository.find({
+      relations: { user: true },
+      select: { user: { id: true }, id: true, type: true },
+      where: { processId: config.processId },
+    });
+  }
+
+  async deleteSearchesByProcessId() {
+    const config = this.configService.get<SystemOption>(SYSTEM_CONFIG);
+
+    await this.searchRepository.delete({ processId: config.processId });
+  }
+
   async getSearch(userId: number, query: GetSearchQuery) {
     const search = await this.searchRepository.findOneBy({
       user: { id: userId },
