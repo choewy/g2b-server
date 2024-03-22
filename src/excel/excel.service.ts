@@ -232,4 +232,14 @@ export class ExcelService {
 
     return new ExcelDto(excel);
   }
+
+  async getExcels(userId: number, type: SearchType) {
+    const excels = await this.excelRepository.find({
+      where: { user: { id: userId }, type },
+      order: { uploadedAt: 'DESC' },
+      take: 20,
+    });
+
+    return excels.map((excel) => new ExcelDto(excel));
+  }
 }
