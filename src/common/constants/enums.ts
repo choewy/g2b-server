@@ -13,4 +13,5 @@ export enum ExceptionMessage {
   InvalidEmailCode = '유효하지 않은 인증 코드입니다.',
   ExpiredEmailCode = '인증 코드가 만료되었습니다.',
   InvalidTempPassword = '유효하지 않은 임시 비밀번호입니다.',
+  AlreadyExistsKeyword = '이미 등록된 키워드입니다.',
 }

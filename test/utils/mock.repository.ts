@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
 import { Provider, Type } from '@nestjs/common';
 import { TestingModule } from '@nestjs/testing';
 import { Repository } from 'typeorm';

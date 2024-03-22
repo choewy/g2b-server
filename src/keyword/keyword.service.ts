@@ -1,5 +1,5 @@
-import { KeywordDto, KeywordEntity } from '@common';
-import { Injectable } from '@nestjs/common';
+import { ExceptionMessage, KeywordDto, KeywordEntity } from '@common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -25,7 +25,26 @@ export class KeywordService {
   }
 
   async createKeyword(userId: number, command: SetKeywordCommand) {
-    return;
+    const dupliatedKeyword = await this.keywordRepository
+      .createQueryBuilder()
+      .where('userId = :userId', { userId })
+      .andWhere('type = :type', { type: command.type })
+      .andWhere('BINARY text = :text', { text: command.text })
+      .getExists();
+
+    if (dupliatedKeyword === true) {
+      throw new ConflictException(ExceptionMessage.AlreadyExistsKeyword);
+    }
+
+    const keyword = new KeywordEntity({
+      userId,
+      type: command.type,
+      text: command.text,
+    });
+
+    await this.keywordRepository.insert(keyword);
+
+    return new KeywordDto(keyword);
   }
 
   async updateKeyword(userId: number, keywordId: number, command: SetKeywordCommand) {

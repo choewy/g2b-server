@@ -1,7 +1,9 @@
+import { plainToInstance } from 'class-transformer';
 import {
   BaseEntity,
   Column,
   CreateDateColumn,
+  DeepPartial,
   Entity,
   Index,
   JoinColumn,
@@ -35,4 +37,14 @@ export class KeywordEntity extends BaseEntity {
   @ManyToOne(() => UserEntity, (e) => e.keywords, { onDelete: 'CASCADE' })
   @JoinColumn()
   user: UserEntity;
+
+  constructor(args?: DeepPartial<Pick<KeywordEntity, 'type' | 'text'>> & { userId?: number }) {
+    super();
+
+    if (args) {
+      this.user = plainToInstance(UserEntity, { id: args.userId });
+      this.type = args.type;
+      this.text = args.text;
+    }
+  }
 }
