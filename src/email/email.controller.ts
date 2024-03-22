@@ -13,7 +13,7 @@ import { EmailService } from './email.service';
 export class EmailController {
   constructor(private readonly emailService: EmailService) {}
 
-  @Get('signup')
+  @Get('check/signup')
   @UseGuards(JwtAuthGuard)
   @IgnoreJwtGuardError()
   @ApiOperation({ summary: '회원가입 인증 메일 코드 잔여 시간 확인' })
