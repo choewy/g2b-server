@@ -14,12 +14,12 @@ export class SearchService {
     private readonly searchRepository: Repository<SearchEntity>,
   ) {}
 
-  async getSearches(userId: number, query: GetSearchQuery) {
-    const searches = await this.searchRepository.findBy({
+  async getSearch(userId: number, query: GetSearchQuery) {
+    const search = await this.searchRepository.findOneBy({
       user: { id: userId },
       type: query.type,
     });
 
-    return searches.map((search) => new SearchDto(search));
+    return search === null ? null : new SearchDto(search);
   }
 }
