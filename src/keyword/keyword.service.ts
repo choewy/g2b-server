@@ -1,4 +1,4 @@
-import { KeywordEntity } from '@common';
+import { KeywordDto, KeywordEntity } from '@common';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -14,7 +14,14 @@ export class KeywordService {
   ) {}
 
   async getKeywords(userId: number, query: GetKeywordsQuery) {
-    return;
+    const keywords = await this.keywordRepository.find({
+      where: {
+        user: { id: userId },
+        type: query.type,
+      },
+    });
+
+    return keywords.map((keyword) => new KeywordDto(keyword));
   }
 
   async createKeyword(userId: number, command: SetKeywordCommand) {
