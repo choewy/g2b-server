@@ -100,6 +100,32 @@ describe('KeywordService', () => {
       const result = await service.updateKeyword(1, 1, plainToInstance(SetKeywordCommand, { type: KeywordType.Include, text: 'keyword' }));
 
       expect(result).toBeInstanceOf(KeywordDto);
+      expect(jest.spyOn(keywordRepository.from(module), 'update')).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('deleteKeyword', () => {
+    it('키워드가 존재하지 않으면 NotFoundException을 던진다.', async () => {
+      jest.spyOn(keywordRepository.from(module), 'findOneBy').mockResolvedValue(null);
+
+      try {
+        await service.deleteKeyword(1, 1);
+      } catch (e) {
+        const exception = e as HttpException;
+        expect(exception).toBeInstanceOf(NotFoundException);
+        expect(exception.getStatus()).toBe(404);
+        expect(exception.message).toBe(ExceptionMessage.NotFoundKeyword);
+      }
+    });
+
+    it('키워드 삭제가 완료되면 KeywordDto를 반환한다.', async () => {
+      jest.spyOn(keywordRepository.from(module), 'findOneBy').mockResolvedValue(new KeywordEntity());
+      jest.spyOn(keywordRepository.from(module), 'delete').mockResolvedValue(null);
+
+      const result = await service.deleteKeyword(1, 1);
+
+      expect(result).toBeInstanceOf(KeywordDto);
+      expect(jest.spyOn(keywordRepository.from(module), 'delete')).toHaveBeenCalledTimes(1);
     });
   });
 });

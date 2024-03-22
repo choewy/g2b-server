@@ -80,6 +80,17 @@ export class KeywordService {
   }
 
   async deleteKeyword(userId: number, keywordId: number) {
-    return;
+    const keyword = await this.keywordRepository.findOneBy({
+      id: keywordId,
+      user: { id: userId },
+    });
+
+    if (keyword === null) {
+      throw new NotFoundException(ExceptionMessage.NotFoundKeyword);
+    }
+
+    await this.keywordRepository.delete(keyword.id);
+
+    return new KeywordDto(keyword);
   }
 }
