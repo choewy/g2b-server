@@ -1,3 +1,4 @@
+import { EventPublisher } from '@choewy/nestjs-event';
 import { CookieKey, ExceptionMessage, JWT_CONFIG, UserDto, UserEntity } from '@common';
 import { BadRequestException, ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -6,6 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { compareSync, hashSync } from 'bcrypt';
 import { CookieOptions, Request, Response } from 'express';
 import { DateTime } from 'luxon';
+import { SendSignUpEmailEvent } from 'src/email/events';
 import { Repository } from 'typeorm';
 
 import { SignInCommand, SignUpCommand } from './commands';
@@ -18,6 +20,7 @@ export class AuthService {
     private readonly userRepository: Repository<UserEntity>,
     private readonly configService: ConfigService,
     private readonly jwtService: JwtService,
+    private readonly eventPublisher: EventPublisher,
   ) {}
 
   protected readonly cookieOptions: CookieOptions = {
@@ -161,13 +164,10 @@ export class AuthService {
     });
 
     await this.userRepository.insert(user);
+    await this.eventPublisher.publish(new SendSignUpEmailEvent(user.id));
 
     this.setAccessToken(res, user.id, user.email);
     this.setRefreshToken(res, user.id, user.email);
-
-    /**
-     * @TODO 인증메일 발송
-     **/
 
     return new UserDto(user);
   }

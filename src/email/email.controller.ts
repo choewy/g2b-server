@@ -27,17 +27,18 @@ export class EmailController {
   @ApiOperation({ summary: '회원가입 인증 메일 발송' })
   @ApiCreatedResponse({ type: null })
   async sendSignUpVerificationEmail(@ReqUser() user: UserTokenPayload) {
-    return this.emailService.createSignUpEmailVerification(user.id);
+    return this.emailService.sendSignUpVerificationEmail(user.id);
   }
 
   @Post('send/reset-password')
   @ApiOperation({ summary: '임시 비밀번호 발급 메일 발송' })
   @ApiCreatedResponse({ type: null })
   async sendResetPasswordVerificationEmail(@Body() command: SendResetPasswordEmailCommand) {
-    return this.emailService.createResetPasswordEmailVerification(command.email);
+    return this.emailService.sendResetPasswordVerificationEmail(command.email);
   }
 
   @Patch('verify/signup')
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: '이메일 인증' })
   @ApiOkResponse({ type: UserDto })
   async verifySignUpEmail(@ReqUser() user: UserTokenPayload, @Body() command: VerifyEmailCommand) {

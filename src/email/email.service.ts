@@ -1,3 +1,4 @@
+import { EventPublisher } from '@choewy/nestjs-event';
 import { EMAIL_CONFIG, EmailVerificationEntity, EmailVerificationType, ExceptionMessage, UserDto, UserEntity } from '@common';
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -5,7 +6,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DateTime } from 'luxon';
 import { createTransport } from 'nodemailer';
 import SMTPTransport from 'nodemailer/lib/smtp-transport';
-import { AuthService } from 'src/auth/auth.service';
+import { UpdatePasswordEvent } from 'src/auth/events';
 import { DataSource, MoreThan, Repository } from 'typeorm';
 import { v4 } from 'uuid';
 
@@ -15,13 +16,13 @@ import { SendEmailContent } from './interfaces';
 @Injectable()
 export class EmailService {
   constructor(
+    private readonly configService: ConfigService,
+    private readonly eventPublisher: EventPublisher,
     private readonly dataSource: DataSource,
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
     @InjectRepository(EmailVerificationEntity)
     private readonly emailVerificationRepository: Repository<EmailVerificationEntity>,
-    private readonly configService: ConfigService,
-    private readonly authService: AuthService,
   ) {}
 
   async getEmailExpiresIn(userId: number) {
@@ -114,7 +115,7 @@ export class EmailService {
     }
   }
 
-  async createSignUpEmailVerification(userId: number) {
+  async sendSignUpVerificationEmail(userId: number) {
     const user = await this.userRepository.findOneBy({ id: userId });
 
     if (user === null) {
@@ -136,7 +137,7 @@ export class EmailService {
     ]);
   }
 
-  async createResetPasswordEmailVerification(email: string) {
+  async sendResetPasswordVerificationEmail(email: string) {
     const existsUserByEmail = await this.userRepository.existsBy({ email });
 
     if (existsUserByEmail === false) {
@@ -199,9 +200,7 @@ export class EmailService {
     }
 
     await this.dataSource.transaction(async () => {
-      user.password = this.authService.hashingPassword(command.newPassword);
-
-      await this.userRepository.update(user.id, user);
+      await this.eventPublisher.publish(new UpdatePasswordEvent(user, command.newPassword));
       await this.emailVerificationRepository.update(emailVerification.id, { verified: true });
     });
 

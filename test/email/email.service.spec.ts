@@ -1,11 +1,10 @@
+import { EventPublisher } from '@choewy/nestjs-event';
 import { EmailVerificationEntity, UserEntity } from '@common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 import { plainToInstance } from 'class-transformer';
 import { DateTime } from 'luxon';
-import { AuthService } from 'src/auth/auth.service';
-import { TestAuthService } from 'test/auth/auth.service';
 import { MockRepository } from 'test/utils';
 import { DataSource } from 'typeorm';
 
@@ -26,8 +25,8 @@ describe('EmailService', () => {
         emailVerificationRepository.createProvider(),
         ConfigService,
         JwtService,
-        { provide: AuthService, useClass: TestAuthService },
         { provide: DataSource, useValue: { transaction: jest.fn() } },
+        { provide: EventPublisher, useValue: { publish: jest.fn() } },
       ],
     }).compile();
     service = module.get(TestEmailService);

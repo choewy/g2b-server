@@ -16,6 +16,6 @@ export const TypeOrmConfig = registerAs(
     synchronize: process.env.NODE_ENV === NodeEnv.Local ? process.env.TYPEORM_SYNC === 'true' : false,
     autoLoadEntities: true,
     entities: [process.env.PWD + '/dist/**/*.entity.js'],
-    logging: ['error', 'warn'],
+    logging: true,
   }),
 );

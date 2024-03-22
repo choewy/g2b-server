@@ -1,3 +1,4 @@
+import { EventModule } from '@choewy/nestjs-event';
 import {
   AwsConfig,
   EmailConfig,
@@ -32,6 +33,7 @@ import { SearchModule } from './search/search.module';
         return config.get(TYPEORM_CONFIG);
       },
     }),
+    EventModule.register({ global: true }),
     AuthModule.forRoot(),
     EmailModule,
     KeywordModule,

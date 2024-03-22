@@ -1,3 +1,4 @@
+import { EventPublisher } from '@choewy/nestjs-event';
 import { ExceptionMessage, UserDto, UserEntity } from '@common';
 import { BadRequestException, ConflictException, HttpException, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -19,7 +20,13 @@ describe('AuthService', () => {
 
   beforeAll(async () => {
     module = await Test.createTestingModule({
-      providers: [TestAuthService, userRepository.createProvider(), ConfigService, JwtService],
+      providers: [
+        TestAuthService,
+        ConfigService,
+        JwtService,
+        userRepository.createProvider(),
+        { provide: EventPublisher, useValue: { publish: jest.fn() } },
+      ],
     }).compile();
     context = module.get(TestAuthService);
   });

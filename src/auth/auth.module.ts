@@ -4,6 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
+import { AuthEventHandler } from './auth-event.handler';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './guards';
@@ -25,8 +26,8 @@ export class AuthModule {
         }),
       ],
       controllers: [AuthController],
-      providers: [AuthService, JwtAuthGuard],
-      exports: [AuthService, JwtAuthGuard],
+      providers: [JwtAuthGuard, AuthService, AuthEventHandler],
+      exports: [JwtAuthGuard, AuthService],
     };
   }
 }

@@ -1,3 +1,4 @@
+import { EventPublisher } from '@choewy/nestjs-event';
 import { ExceptionMessage, UserEntity } from '@common';
 import { HttpException, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -11,6 +12,7 @@ import { MockContext, MockRepository } from 'test/utils';
 import { TestAuthService } from './auth.service';
 
 const context = new MockContext().createExecutionContext();
+const userRepository = new MockRepository(UserEntity);
 
 describe('JwtAuthGuard', () => {
   let module: TestingModule;
@@ -22,13 +24,11 @@ describe('JwtAuthGuard', () => {
       providers: [
         JwtAuthGuard,
         Reflector,
-        new MockRepository(UserEntity).createProvider(),
-        {
-          provide: AuthService,
-          useClass: TestAuthService,
-        },
         ConfigService,
         JwtService,
+        userRepository.createProvider(),
+        { provide: AuthService, useClass: TestAuthService },
+        { provide: EventPublisher, useValue: { publish: jest.fn() } },
       ],
     }).compile();
 
