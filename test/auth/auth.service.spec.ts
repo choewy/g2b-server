@@ -132,13 +132,15 @@ describe('AuthService', () => {
         });
     });
 
-    it('회원가입이 성공하면 accessToken과 refreshToken을 Cookie에 등록하고, UserDto를 반환한다.', async () => {
+    it('회원가입이 성공하면 UserEntity 생성 및 SendSignUpEvent를 발행 후 accessToken과 refreshToken을 Cookie에 등록하고, UserDto를 반환한다.', async () => {
       jest.spyOn(userRepository.from(module), 'existsBy').mockResolvedValue(false);
       jest.spyOn(userRepository.from(module), 'insert').mockResolvedValue({ raw: {}, identifiers: [], generatedMaps: [] });
 
       await context
         .signUp(response, plainToInstance(SignUpCommand, { email: 'test@example.com', name: 'test', password: 'a', confirmPassword: 'a' }))
         .then((e) => {
+          expect(jest.spyOn(userRepository.from(module), 'insert')).toHaveBeenCalledTimes(1);
+          expect(jest.spyOn(module.get(EventPublisher), 'publish')).toHaveBeenCalledTimes(1);
           expect(jest.spyOn(context, 'setAccessToken')).toHaveBeenCalledTimes(1);
           expect(jest.spyOn(context, 'setRefreshToken')).toHaveBeenCalledTimes(1);
           expect(e).toBeInstanceOf(UserDto);
