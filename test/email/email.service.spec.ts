@@ -1,5 +1,5 @@
 import { EventPublisher } from '@choewy/nestjs-event';
-import { EmailVerificationEntity, UserEntity } from '@common';
+import { EmailVerificationEntity, EmailVerificationType, UserEntity } from '@common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
@@ -67,6 +67,16 @@ describe('EmailService', () => {
       const seconds = await service.getEmailExpiresIn(1);
 
       expect(seconds < 0).toBeTruthy();
+    });
+  });
+
+  describe('createCode', () => {
+    it('SignUp 인증코드는 6자리로 생성되어야 한다.', () => {
+      expect(service.createCode(EmailVerificationType.Signup).length).toBe(6);
+    });
+
+    it('ResetPassword 인증코드는 16자리로 생성되어야 한다.', () => {
+      expect(service.createCode(EmailVerificationType.ResetPassword).length).toBe(16);
     });
   });
 });
