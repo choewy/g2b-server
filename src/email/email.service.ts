@@ -200,7 +200,7 @@ export class EmailService {
     }
 
     await this.dataSource.transaction(async () => {
-      await this.eventPublisher.publish(new UpdatePasswordEvent(user, command.newPassword));
+      await this.eventPublisher.publish(new UpdatePasswordEvent(user, command.newPassword), { throwError: true });
       await this.emailVerificationRepository.update(emailVerification.id, { verified: true });
     });
 
