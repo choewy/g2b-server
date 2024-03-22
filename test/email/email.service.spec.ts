@@ -1,13 +1,14 @@
 import { EventPublisher } from '@choewy/nestjs-event';
-import { EmailVerificationEntity, EmailVerificationType, ExceptionMessage, UserEntity } from '@common';
+import { EmailVerificationEntity, EmailVerificationType, ExceptionMessage, UserDto, UserEntity } from '@common';
 import { ConflictException, HttpException, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 import { plainToInstance } from 'class-transformer';
 import { DateTime } from 'luxon';
+import { VerifyEmailCommand } from 'src/email/commands';
 import { MockRepository } from 'test/utils';
-import { DataSource } from 'typeorm';
+import { DataSource, EntityManager } from 'typeorm';
 
 import { TestEmailService } from './email.service';
 
@@ -26,7 +27,7 @@ describe('EmailService', () => {
         emailVerificationRepository.createProvider(),
         ConfigService,
         JwtService,
-        { provide: DataSource, useValue: { transaction: jest.fn() } },
+        { provide: DataSource, useValue: { transaction: (fn: (em: EntityManager) => Promise<any>) => fn(new EntityManager(null)) } },
         { provide: EventPublisher, useValue: { publish: jest.fn() } },
       ],
     }).compile();
@@ -35,7 +36,9 @@ describe('EmailService', () => {
 
   beforeEach(() => {
     jest.spyOn(service, 'sendEmail').mockClear();
+    jest.spyOn(userRepository.from(module), 'update').mockClear();
     jest.spyOn(emailVerificationRepository.from(module), 'insert').mockClear();
+    jest.spyOn(emailVerificationRepository.from(module), 'update').mockClear();
   });
 
   it('EmailService가 정의되어 있어야 한다.', () => {
@@ -197,8 +200,30 @@ describe('EmailService', () => {
   });
 
   describe('verifyEmail', () => {
-    it('', async () => {
-      expect(1).toBe(1);
+    it('user가 존재하지 않으면 NotFoundException을 던진다.', async () => {
+      jest.spyOn(userRepository.from(module), 'findOneBy').mockResolvedValue(null);
+
+      try {
+        await service.verifyEmail(1, plainToInstance(VerifyEmailCommand, { code: 'abcdef' }));
+      } catch (e) {
+        const exception = e as HttpException;
+        expect(exception).toBeInstanceOf(NotFoundException);
+        expect(exception.getStatus()).toBe(404);
+        expect(exception.message).toBe(ExceptionMessage.NotFoundAuth);
+      }
+    });
+
+    it('이메일 인증 코드가 유효하면 user.verified와 emailVerification.verifed를 true로 변경하고, UserDto를 반환한다.', async () => {
+      jest.spyOn(userRepository.from(module), 'findOneBy').mockResolvedValue(new UserEntity());
+      jest.spyOn(userRepository.from(module), 'update').mockResolvedValue(null);
+      jest.spyOn(emailVerificationRepository.from(module), 'findOneBy').mockResolvedValue(new EmailVerificationEntity());
+      jest.spyOn(emailVerificationRepository.from(module), 'update').mockResolvedValue(null);
+
+      const result = await service.verifyEmail(1, plainToInstance(VerifyEmailCommand, { code: 'abcdef' }));
+
+      expect(result).toBeInstanceOf(UserDto);
+      expect(jest.spyOn(userRepository.from(module), 'update')).toHaveBeenCalledTimes(1);
+      expect(jest.spyOn(emailVerificationRepository.from(module), 'update')).toHaveBeenCalledTimes(1);
     });
   });
 
