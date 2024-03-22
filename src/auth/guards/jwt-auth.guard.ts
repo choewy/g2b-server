@@ -1,20 +1,23 @@
+import { EventPublisher } from '@choewy/nestjs-event';
 import { ExceptionMessage } from '@common';
 import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Request, Response } from 'express';
 
-import { AuthService } from '../auth.service';
 import { IGNORE_JWT_GUARD_ERROR } from '../decorators';
+import { DeleteTokensEvent, SetTokensEvent, VerifyAccessTokenEvent, VerifyRefreshTokenEvent } from '../events';
+import { UserTokenVerifyResult } from '../interfaces';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
-  constructor(private readonly reflector: Reflector, private readonly authService: AuthService) {}
+  constructor(private readonly reflector: Reflector, private readonly eventPublisher: EventPublisher) {}
 
-  canActivate(context: ExecutionContext): boolean {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const req = context.switchToHttp().getRequest<Request>();
     const res = context.switchToHttp().getResponse<Response>();
 
-    const accessTokenResult = this.authService.verifyAccessToken(req);
+    const accessTokenResults = await this.eventPublisher.publish(new VerifyAccessTokenEvent(req));
+    const accessTokenResult = accessTokenResults.getFirstValue() as UserTokenVerifyResult;
 
     if (accessTokenResult.error || accessTokenResult.user === null) {
       const ignoreJwtGuardError = this.reflector.getAllAndOverride(IGNORE_JWT_GUARD_ERROR, [context.getClass(), context.getHandler()]);
@@ -23,7 +26,7 @@ export class JwtAuthGuard implements CanActivate {
         return true;
       }
 
-      this.authService.deleteTokens(res);
+      await this.eventPublisher.publish(new DeleteTokensEvent(res));
       throw new UnauthorizedException(ExceptionMessage.FailAuth, {
         cause: {
           name: accessTokenResult.error?.name,
@@ -32,20 +35,17 @@ export class JwtAuthGuard implements CanActivate {
       });
     }
 
-    req['user'] = {
-      id: accessTokenResult.user.id,
-      email: accessTokenResult.user.email,
-    };
+    req['user'] = { id: accessTokenResult.user.id, email: accessTokenResult.user.email };
 
     if (accessTokenResult.expired === false) {
       return true;
     }
 
-    const refreshTokenResult = this.authService.verifyRefreshToken(req);
+    const refreshTokenResults = await this.eventPublisher.publish(new VerifyRefreshTokenEvent(req));
+    const refreshTokenResult = refreshTokenResults.getFirstValue() as UserTokenVerifyResult;
 
     if (refreshTokenResult.error || refreshTokenResult.user === null) {
-      this.authService.deleteTokens(res);
-
+      await this.eventPublisher.publish(new DeleteTokensEvent(res));
       throw new UnauthorizedException(ExceptionMessage.FailAuth, {
         cause: {
           name: refreshTokenResult.error?.name,
@@ -55,8 +55,7 @@ export class JwtAuthGuard implements CanActivate {
     }
 
     if (accessTokenResult.user?.id !== refreshTokenResult.user?.id) {
-      this.authService.deleteTokens(res);
-
+      await this.eventPublisher.publish(new DeleteTokensEvent(res));
       throw new UnauthorizedException(ExceptionMessage.FailAuth, {
         cause: {
           accessTokenPayload: accessTokenResult.user,
@@ -65,8 +64,7 @@ export class JwtAuthGuard implements CanActivate {
       });
     }
 
-    this.authService.setAccessToken(res, accessTokenResult.user.id, accessTokenResult.user.email);
-    this.authService.setRefreshToken(res, accessTokenResult.user.id, accessTokenResult.user.email);
+    await this.eventPublisher.publish(new SetTokensEvent(res, accessTokenResult.user));
 
     return true;
   }

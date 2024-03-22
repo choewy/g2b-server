@@ -48,7 +48,7 @@ export class AuthService {
     return compareSync(commandPassword, userPassword);
   }
 
-  hashingPassword(commandPassword: string) {
+  protected hashingPassword(commandPassword: string) {
     return hashSync(commandPassword, 10);
   }
 

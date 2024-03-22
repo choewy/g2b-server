@@ -34,7 +34,7 @@ import { SearchModule } from './search/search.module';
       },
     }),
     EventModule.register({ global: true }),
-    AuthModule.forRoot(),
+    AuthModule,
     EmailModule,
     KeywordModule,
     SearchModule,
