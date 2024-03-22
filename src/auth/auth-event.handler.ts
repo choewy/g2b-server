@@ -2,11 +2,23 @@ import { OnEvent } from '@choewy/nestjs-event';
 import { Injectable } from '@nestjs/common';
 
 import { AuthService } from './auth.service';
-import { DeleteTokensEvent, SetTokensEvent, UpdatePasswordEvent, VerifyAccessTokenEvent, VerifyRefreshTokenEvent } from './events';
+import {
+  DeleteTokensEvent,
+  SetTokensEvent,
+  UpdatePasswordEvent,
+  VerifyAccessTokenEvent,
+  VerifyRefreshTokenEvent,
+  VerifyAccessTokenWithIgnoreExpirationEvent,
+} from './events';
 
 @Injectable()
 export class AuthEventHandler {
   constructor(private readonly authService: AuthService) {}
+
+  @OnEvent(VerifyAccessTokenWithIgnoreExpirationEvent)
+  async handleVerifyAccessTokenWithIgnoreExpirationEvent(event: VerifyAccessTokenWithIgnoreExpirationEvent) {
+    return this.authService.verifyAccessTokenWithIgnoreExpiration(event.accessToken);
+  }
 
   @OnEvent(VerifyAccessTokenEvent)
   async handleVerifyAccessTokenEvent(event: VerifyAccessTokenEvent) {

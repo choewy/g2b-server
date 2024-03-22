@@ -71,6 +71,23 @@ export class AuthService {
     res.clearCookie(CookieKey.JwtRefreshToken, this.cookieOptions);
   }
 
+  verifyAccessTokenWithIgnoreExpiration(accessToken: string) {
+    const config = this.configService.get<JwtModuleOptions>(JWT_CONFIG);
+    const result: UserTokenVerifyResult = {
+      user: null,
+      error: null,
+      expired: false,
+    };
+
+    try {
+      result.user = this.jwtService.verify(accessToken, { secret: config.secret, ignoreExpiration: true });
+    } catch (e) {
+      result.error = e;
+    }
+
+    return result;
+  }
+
   verifyAccessToken(req: Request) {
     const config = this.configService.get<JwtModuleOptions>(JWT_CONFIG);
 
@@ -164,8 +181,8 @@ export class AuthService {
     });
 
     await this.userRepository.insert(user);
-    await this.eventPublisher.publish(new SendSignUpEmailEvent(user.id));
 
+    this.eventPublisher.publish(new SendSignUpEmailEvent(user.id));
     this.setAccessToken(res, user.id, user.email);
     this.setRefreshToken(res, user.id, user.email);
 

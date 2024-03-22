@@ -1,3 +1,4 @@
+export * from './verify-access-token-with-ignore-expiration.event';
 export * from './verify-access-token.event';
 export * from './verify-refresh-token.event';
 export * from './set-tokens.event';
