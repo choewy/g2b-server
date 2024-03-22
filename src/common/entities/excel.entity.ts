@@ -1,6 +1,6 @@
 import { BaseEntity, Column, CreateDateColumn, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
-import { SearchStateType } from './enums';
+import { SearchType } from './enums';
 import { UserEntity } from './user.entity';
 
 @Index('uploaded_excel_file_idx_user_type', ['user.id', 'type'])
@@ -10,7 +10,7 @@ export class ExcelEntity extends BaseEntity {
   readonly id: number;
 
   @Column({ type: 'varchar', length: 20 })
-  type: SearchStateType;
+  type: SearchType;
 
   @Column({ type: 'varchar', length: 255, unique: true })
   key: string;

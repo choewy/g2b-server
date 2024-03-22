@@ -8,7 +8,7 @@ export enum KeywordType {
   Exclude = 'exclude',
 }
 
-export enum SearchStateType {
+export enum SearchType {
   Bids = 'bids',
   Hrcs = 'hrcs',
 }

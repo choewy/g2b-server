@@ -13,7 +13,7 @@ import {
 import { EmailVerificationEntity } from './email-verification.entity';
 import { ExcelEntity } from './excel.entity';
 import { KeywordEntity } from './keyword.entity';
-import { SearchStateEntity } from './saerch-state.entity';
+import { SearchEntity } from './saerch.entity';
 
 @Entity({ name: 'user' })
 export class UserEntity extends BaseEntity {
@@ -42,9 +42,9 @@ export class UserEntity extends BaseEntity {
   @JoinTable()
   keywords: KeywordEntity[];
 
-  @OneToMany(() => SearchStateEntity, (e) => e.user, { cascade: true })
+  @OneToMany(() => SearchEntity, (e) => e.user, { cascade: true })
   @JoinTable()
-  searchStates: SearchStateEntity[];
+  searches: SearchEntity[];
 
   @OneToMany(() => ExcelEntity, (e) => e.user, { cascade: true })
   @JoinTable()
