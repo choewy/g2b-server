@@ -1,12 +1,12 @@
 import { EventPublisher } from '@choewy/nestjs-event';
 import { EmailVerificationEntity, EmailVerificationType, ExceptionMessage, UserDto, UserEntity } from '@common';
-import { ConflictException, HttpException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, HttpException, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 import { plainToInstance } from 'class-transformer';
 import { DateTime } from 'luxon';
-import { VerifyEmailCommand } from 'src/email/commands';
+import { ResetPasswordCommand, VerifyEmailCommand } from 'src/email/commands';
 import { MockRepository } from 'test/utils';
 import { DataSource, EntityManager } from 'typeorm';
 
@@ -36,6 +36,7 @@ describe('EmailService', () => {
 
   beforeEach(() => {
     jest.spyOn(service, 'sendEmail').mockClear();
+    jest.spyOn(module.get(EventPublisher), 'publish').mockClear();
     jest.spyOn(userRepository.from(module), 'update').mockClear();
     jest.spyOn(emailVerificationRepository.from(module), 'insert').mockClear();
     jest.spyOn(emailVerificationRepository.from(module), 'update').mockClear();
@@ -228,8 +229,46 @@ describe('EmailService', () => {
   });
 
   describe('verifyResetPasswordEmail', () => {
-    it('', async () => {
-      expect(1).toBe(1);
+    it('user가 존재하지 않으면 NotFoundException을 던진다.', async () => {
+      jest.spyOn(userRepository.from(module), 'findOneBy').mockResolvedValue(null);
+
+      try {
+        await service.verifyResetPasswordEmail(plainToInstance(ResetPasswordCommand, {}));
+      } catch (e) {
+        const exception = e as HttpException;
+        expect(exception).toBeInstanceOf(NotFoundException);
+        expect(exception.getStatus()).toBe(404);
+        expect(exception.message).toBe(ExceptionMessage.NotFoundAuth);
+      }
+    });
+
+    it('newPassword와 confirmPassword가 같지 않으면 BadRequestException을 던진다.', async () => {
+      jest.spyOn(userRepository.from(module), 'findOneBy').mockResolvedValue(new UserEntity());
+      jest.spyOn(emailVerificationRepository.from(module), 'findOneBy').mockResolvedValue(new EmailVerificationEntity());
+
+      try {
+        await service.verifyResetPasswordEmail(plainToInstance(ResetPasswordCommand, { newPassword: 'a', confirmPassword: 'b' }));
+      } catch (e) {
+        const exception = e as HttpException;
+        expect(exception).toBeInstanceOf(BadRequestException);
+        expect(exception.getStatus()).toBe(400);
+        expect(exception.message).toBe(ExceptionMessage.IncorrectPasswords);
+      }
+    });
+
+    it('이메일 인증 코드(임시 비밀번호)가 유효하고 newPassword와 confirmPassword가 같으면 user.password와 emailVerification.verified를 수정하고, UserDto를 반환한다.', async () => {
+      jest.spyOn(userRepository.from(module), 'findOneBy').mockResolvedValue(new UserEntity());
+      jest.spyOn(module.get(EventPublisher), 'publish').mockResolvedValue(null);
+      jest.spyOn(emailVerificationRepository.from(module), 'findOneBy').mockResolvedValue(new EmailVerificationEntity());
+      jest.spyOn(emailVerificationRepository.from(module), 'update').mockResolvedValue(null);
+
+      const result = await service.verifyResetPasswordEmail(
+        plainToInstance(ResetPasswordCommand, { newPassword: 'a', confirmPassword: 'a' }),
+      );
+
+      expect(result).toBeInstanceOf(UserDto);
+      expect(jest.spyOn(module.get(EventPublisher), 'publish')).toHaveBeenCalledTimes(1);
+      expect(jest.spyOn(emailVerificationRepository.from(module), 'update')).toHaveBeenCalledTimes(1);
     });
   });
 });
