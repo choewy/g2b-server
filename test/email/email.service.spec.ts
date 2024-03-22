@@ -1,5 +1,6 @@
 import { EventPublisher } from '@choewy/nestjs-event';
-import { EmailVerificationEntity, EmailVerificationType, UserEntity } from '@common';
+import { EmailVerificationEntity, EmailVerificationType, ExceptionMessage, UserEntity } from '@common';
+import { ConflictException, HttpException, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
@@ -87,6 +88,43 @@ describe('EmailService', () => {
 
     it('만료 잔여 시간이 5분 지났으면 true를 반환해야 한다.', () => {
       expect(service.isExpired(DateTime.local().minus({ minutes: 5 }).toJSDate())).toBeTruthy();
+    });
+  });
+
+  describe('validateEmailVerification', () => {
+    it('emailVerification이 null이면 NotFoundException를 던진다.', async () => {
+      try {
+        service.validateEmailVerification(null);
+      } catch (e) {
+        const exception = e as HttpException;
+        expect(exception).toBeInstanceOf(NotFoundException);
+        expect(exception.getStatus()).toBe(404);
+        expect(exception.message).toBe(ExceptionMessage.InvalidEmailCode);
+      }
+    });
+
+    it('emailVerification의 코드가 이미 처리되었다면(verified = true), ConflictException를 던진다.', async () => {
+      try {
+        service.validateEmailVerification(plainToInstance(EmailVerificationEntity, { verified: true }));
+      } catch (e) {
+        const exception = e as HttpException;
+        expect(exception).toBeInstanceOf(ConflictException);
+        expect(exception.getStatus()).toBe(409);
+        expect(exception.message).toBe(ExceptionMessage.InvalidEmailCode);
+      }
+    });
+
+    it('emailVerification의 코드가 만료되었다면, ConflictException를 던진다.', async () => {
+      try {
+        service.validateEmailVerification(
+          plainToInstance(EmailVerificationEntity, { expiresIn: DateTime.local().minus({ seconds: 30 }).toJSDate() }),
+        );
+      } catch (e) {
+        const exception = e as HttpException;
+        expect(exception).toBeInstanceOf(ConflictException);
+        expect(exception.getStatus()).toBe(409);
+        expect(exception.message).toBe(ExceptionMessage.ExpiredEmailCode);
+      }
     });
   });
 });

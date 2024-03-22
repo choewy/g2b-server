@@ -111,7 +111,7 @@ export class EmailService {
     }
 
     if (this.isExpired(emailVerification.expiresIn)) {
-      throw new ConflictException(ExceptionMessage.ExpiredTempPassword);
+      throw new ConflictException(ExceptionMessage.ExpiredEmailCode);
     }
   }
 

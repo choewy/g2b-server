@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
-import { EmailVerificationType } from '@common';
+import { EmailVerificationEntity, EmailVerificationType } from '@common';
 import { EmailService } from 'src/email/email.service';
 import { SendEmailContent } from 'src/email/interfaces';
 
@@ -27,11 +27,15 @@ export class TestEmailService extends EmailService {
     };
   }
 
-  async sendEmail(email: string, content: SendEmailContent): Promise<void> {
+  sendEmail(email: string, content: SendEmailContent): Promise<void> {
     return;
   }
 
   isExpired(expiresIn: Date): boolean {
     return super.isExpired(expiresIn);
+  }
+
+  validateEmailVerification(emailVerification: EmailVerificationEntity): void {
+    return super.validateEmailVerification(emailVerification);
   }
 }
