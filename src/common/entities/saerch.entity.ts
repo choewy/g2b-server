@@ -1,4 +1,16 @@
-import { BaseEntity, Column, CreateDateColumn, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { plainToInstance } from 'class-transformer';
+import {
+  BaseEntity,
+  Column,
+  CreateDateColumn,
+  DeepPartial,
+  DeleteDateColumn,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 import { SearchType } from './enums';
 import { UserEntity } from './user.entity';
@@ -19,7 +31,20 @@ export class SearchEntity extends BaseEntity {
   @CreateDateColumn()
   readonly startedAt: Date;
 
+  @DeleteDateColumn()
+  readonly endedAt: Date | null;
+
   @ManyToOne(() => UserEntity, (e) => e.searches, { nullable: true, onDelete: 'CASCADE' })
   @JoinColumn()
   user: UserEntity | null;
+
+  constructor(args?: DeepPartial<Pick<SearchEntity, 'type' | 'processId'>> & { userId: number }) {
+    super();
+
+    if (args) {
+      this.type = args.type;
+      this.processId = args.processId;
+      this.user = plainToInstance(UserEntity, { id: args.userId });
+    }
+  }
 }
