@@ -79,4 +79,14 @@ describe('EmailService', () => {
       expect(service.createCode(EmailVerificationType.ResetPassword).length).toBe(16);
     });
   });
+
+  describe('isExpired', () => {
+    it('만료 잔여 시간이 5분 남아있으면 false를 반환해야 한다.', () => {
+      expect(service.isExpired(DateTime.local().plus({ minutes: 5 }).toJSDate())).toBeFalsy();
+    });
+
+    it('만료 잔여 시간이 5분 지났으면 true를 반환해야 한다.', () => {
+      expect(service.isExpired(DateTime.local().minus({ minutes: 5 }).toJSDate())).toBeTruthy();
+    });
+  });
 });
