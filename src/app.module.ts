@@ -19,6 +19,7 @@ import { AuthModule } from './auth/auth.module';
 import { EmailModule } from './email/email.module';
 import { ExcelModule } from './excel/excel.module';
 import { KeywordModule } from './keyword/keyword.module';
+import { OpenApiModule } from './openapi/openapi.module';
 import { SearchModule } from './search/search.module';
 
 @Module({
@@ -38,6 +39,7 @@ import { SearchModule } from './search/search.module';
     EmailModule,
     KeywordModule,
     SearchModule,
+    OpenApiModule,
     ExcelModule,
   ],
   controllers: [AppController],
