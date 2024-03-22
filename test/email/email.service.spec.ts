@@ -127,4 +127,60 @@ describe('EmailService', () => {
       }
     });
   });
+
+  describe('sendSignUpVerificationEmail', () => {
+    it('user가 존재하지 않으면 NotFoundException을 던진다.', async () => {
+      jest.spyOn(userRepository.from(module), 'findOneBy').mockResolvedValue(null);
+
+      try {
+        await service.sendSignUpVerificationEmail(1);
+      } catch (e) {
+        const exception = e as HttpException;
+        expect(exception).toBeInstanceOf(NotFoundException);
+        expect(exception.getStatus()).toBe(404);
+        expect(exception.message).toBe(ExceptionMessage.NotFoundAuth);
+      }
+    });
+
+    it('user가 이미 이메일 인증을 받은 상태라면(verified = true), ConflictException를 던진다.', async () => {
+      jest.spyOn(userRepository.from(module), 'findOneBy').mockResolvedValue(plainToInstance(UserEntity, { verified: true }));
+
+      try {
+        await service.sendSignUpVerificationEmail(1);
+      } catch (e) {
+        const exception = e as HttpException;
+        expect(exception).toBeInstanceOf(ConflictException);
+        expect(exception.getStatus()).toBe(409);
+        expect(exception.message).toBe(ExceptionMessage.AlreadyVerifiedEmail);
+      }
+    });
+
+    it('회원가입 인증 메일 발송에 성공하면 아무것도 반환하지 않는다.', async () => {
+      jest.spyOn(userRepository.from(module), 'findOneBy').mockResolvedValue(new UserEntity());
+      jest.spyOn(emailVerificationRepository.from(module), 'insert').mockResolvedValue({ raw: {}, identifiers: [], generatedMaps: [] });
+      jest.spyOn(service, 'sendEmail').mockResolvedValue();
+
+      expect(await service.sendSignUpVerificationEmail(1)).toBeUndefined();
+      expect(jest.spyOn(service, 'sendEmail')).toHaveBeenCalledTimes(1);
+      expect(jest.spyOn(emailVerificationRepository.from(module), 'insert')).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('sendResetPasswordVerificationEmail', () => {
+    it('', async () => {
+      expect(1).toBe(1);
+    });
+  });
+
+  describe('verifyEmail', () => {
+    it('', async () => {
+      expect(1).toBe(1);
+    });
+  });
+
+  describe('verifyResetPasswordEmail', () => {
+    it('', async () => {
+      expect(1).toBe(1);
+    });
+  });
 });
