@@ -1,5 +1,5 @@
-import { ExceptionMessage, KeywordDto, KeywordEntity } from '@common';
-import { ConflictException, Injectable } from '@nestjs/common';
+import { ExceptionMessage, KeywordDto, KeywordEntity, KeywordType } from '@common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -13,6 +13,20 @@ export class KeywordService {
     private readonly keywordRepository: Repository<KeywordEntity>,
   ) {}
 
+  protected hasDuplicated(userId: number, type: KeywordType, text: string, id?: number) {
+    const queryBuilder = this.keywordRepository
+      .createQueryBuilder()
+      .where('userId = :userId', { userId })
+      .andWhere('type = :type', { type })
+      .andWhere('BINARY text = :text', { text });
+
+    if (typeof id === 'number') {
+      queryBuilder.andWhere('id != :id', { id });
+    }
+
+    return queryBuilder.getExists();
+  }
+
   async getKeywords(userId: number, query: GetKeywordsQuery) {
     const keywords = await this.keywordRepository.find({
       where: {
@@ -25,12 +39,7 @@ export class KeywordService {
   }
 
   async createKeyword(userId: number, command: SetKeywordCommand) {
-    const dupliatedKeyword = await this.keywordRepository
-      .createQueryBuilder()
-      .where('userId = :userId', { userId })
-      .andWhere('type = :type', { type: command.type })
-      .andWhere('BINARY text = :text', { text: command.text })
-      .getExists();
+    const dupliatedKeyword = await this.hasDuplicated(userId, command.type, command.text);
 
     if (dupliatedKeyword === true) {
       throw new ConflictException(ExceptionMessage.AlreadyExistsKeyword);
@@ -48,7 +57,26 @@ export class KeywordService {
   }
 
   async updateKeyword(userId: number, keywordId: number, command: SetKeywordCommand) {
-    return;
+    const keyword = await this.keywordRepository.findOneBy({
+      id: keywordId,
+      user: { id: userId },
+      type: command.type,
+    });
+
+    if (keyword === null) {
+      throw new NotFoundException(ExceptionMessage.NotFoundKeyword);
+    }
+
+    const dupliatedKeyword = await this.hasDuplicated(userId, command.type, command.text, keywordId);
+
+    if (dupliatedKeyword === true) {
+      throw new ConflictException(ExceptionMessage.AlreadyExistsKeyword);
+    }
+
+    keyword.text = command.text;
+    await this.keywordRepository.update(keyword.id, keyword);
+
+    return new KeywordDto(keyword);
   }
 
   async deleteKeyword(userId: number, keywordId: number) {

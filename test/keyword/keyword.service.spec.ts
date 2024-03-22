@@ -1,5 +1,5 @@
 import { ExceptionMessage, KeywordDto, KeywordEntity, KeywordType } from '@common';
-import { ConflictException, HttpException } from '@nestjs/common';
+import { ConflictException, HttpException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { plainToInstance } from 'class-transformer';
 import { SetKeywordCommand } from 'src/keyword/commands';
@@ -61,6 +61,45 @@ describe('KeywordService', () => {
 
       expect(result).toBeInstanceOf(KeywordDto);
       expect(jest.spyOn(keywordRepository.from(module), 'insert')).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('updateKeyword', () => {
+    it('키워드가 존재하지 않으면 NotFoundException을 던진다.', async () => {
+      jest.spyOn(keywordRepository.from(module), 'findOneBy').mockResolvedValue(null);
+
+      try {
+        await service.updateKeyword(1, 1, plainToInstance(SetKeywordCommand, { type: KeywordType.Include, text: 'keyword' }));
+      } catch (e) {
+        const exception = e as HttpException;
+        expect(exception).toBeInstanceOf(NotFoundException);
+        expect(exception.getStatus()).toBe(404);
+        expect(exception.message).toBe(ExceptionMessage.NotFoundKeyword);
+      }
+    });
+
+    it('키워드가 존재하나, 변경하려는 키워드의 텍스트가 이미 존재하면 ConflictException을 던진다.', async () => {
+      jest.spyOn(keywordRepository.from(module), 'findOneBy').mockResolvedValue(new KeywordEntity());
+      jest.spyOn(keywordRepository.from(module).createQueryBuilder(), 'getExists').mockResolvedValue(true);
+
+      try {
+        await service.updateKeyword(1, 1, plainToInstance(SetKeywordCommand, { type: KeywordType.Include, text: 'keyword' }));
+      } catch (e) {
+        const exception = e as HttpException;
+        expect(exception).toBeInstanceOf(ConflictException);
+        expect(exception.getStatus()).toBe(409);
+        expect(exception.message).toBe(ExceptionMessage.AlreadyExistsKeyword);
+      }
+    });
+
+    it('키워드 수정이 완료되면 KeywordDto를 반환한다.', async () => {
+      jest.spyOn(keywordRepository.from(module), 'findOneBy').mockResolvedValue(new KeywordEntity());
+      jest.spyOn(keywordRepository.from(module), 'update').mockResolvedValue(null);
+      jest.spyOn(keywordRepository.from(module).createQueryBuilder(), 'getExists').mockResolvedValue(false);
+
+      const result = await service.updateKeyword(1, 1, plainToInstance(SetKeywordCommand, { type: KeywordType.Include, text: 'keyword' }));
+
+      expect(result).toBeInstanceOf(KeywordDto);
     });
   });
 });
