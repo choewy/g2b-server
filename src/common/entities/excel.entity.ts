@@ -1,4 +1,5 @@
-import { BaseEntity, Column, CreateDateColumn, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { plainToInstance } from 'class-transformer';
+import { BaseEntity, Column, CreateDateColumn, DeepPartial, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 import { SearchType } from './enums';
 import { UserEntity } from './user.entity';
@@ -24,4 +25,15 @@ export class ExcelEntity extends BaseEntity {
   @ManyToOne(() => UserEntity, (e) => e.excels, { onDelete: 'SET NULL', nullable: true })
   @JoinColumn()
   user: UserEntity | null;
+
+  constructor(args?: DeepPartial<Pick<ExcelEntity, 'type' | 'key' | 'filename'>> & { userId: number }) {
+    super();
+
+    if (args) {
+      this.type = args.type;
+      this.key = args.key;
+      this.filename = args.filename;
+      this.user = plainToInstance(UserEntity, { id: args.userId });
+    }
+  }
 }
