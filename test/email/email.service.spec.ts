@@ -33,6 +33,11 @@ describe('EmailService', () => {
     service = module.get(TestEmailService);
   });
 
+  beforeEach(() => {
+    jest.spyOn(service, 'sendEmail').mockClear();
+    jest.spyOn(emailVerificationRepository.from(module), 'insert').mockClear();
+  });
+
   it('EmailService가 정의되어 있어야 한다.', () => {
     expect(service).toBeDefined();
   });
@@ -167,8 +172,27 @@ describe('EmailService', () => {
   });
 
   describe('sendResetPasswordVerificationEmail', () => {
-    it('', async () => {
-      expect(1).toBe(1);
+    it('user가 존재하지 않으면 NotFoundException을 던진다.', async () => {
+      jest.spyOn(userRepository.from(module), 'existsBy').mockResolvedValue(false);
+
+      try {
+        await service.sendResetPasswordVerificationEmail('test@example.com');
+      } catch (e) {
+        const exception = e as HttpException;
+        expect(exception).toBeInstanceOf(NotFoundException);
+        expect(exception.getStatus()).toBe(404);
+        expect(exception.message).toBe(ExceptionMessage.NotFoundAuth);
+      }
+    });
+
+    it('비밀번호 재설정 인증 메일 발송에 성공하면 아무것도 반환하지 않는다.', async () => {
+      jest.spyOn(userRepository.from(module), 'existsBy').mockResolvedValue(true);
+      jest.spyOn(emailVerificationRepository.from(module), 'insert').mockResolvedValue({ raw: {}, identifiers: [], generatedMaps: [] });
+      jest.spyOn(service, 'sendEmail').mockResolvedValue();
+
+      expect(await service.sendResetPasswordVerificationEmail('test@example.com')).toBeUndefined();
+      expect(jest.spyOn(service, 'sendEmail')).toHaveBeenCalledTimes(1);
+      expect(jest.spyOn(emailVerificationRepository.from(module), 'insert')).toHaveBeenCalledTimes(1);
     });
   });
 
