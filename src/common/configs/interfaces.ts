@@ -6,6 +6,7 @@ import { NodeEnv } from './enums';
 
 export interface SystemOption {
   nodeEnv: NodeEnv;
+  processId: string;
 }
 
 export interface ServerOption {
@@ -17,6 +18,7 @@ export interface ServerOption {
 export interface AwsClientOption {
   region: string;
   credentials: {
+    region: string;
     accessKeyId: string;
     accessSecretKey: string;
   };

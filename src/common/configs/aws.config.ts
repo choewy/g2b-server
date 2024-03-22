@@ -9,6 +9,7 @@ export const AwsConfig = registerAs(
     client: {
       region: process.env.AWS_REGION,
       credentials: {
+        region: process.env.AWS_REGION,
         accessKeyId: process.env.AWS_ACCESS_KEY_ID,
         accessSecretKey: process.env.AWS_SECRET_ACCESS_KEY,
       },
