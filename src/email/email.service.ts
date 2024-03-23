@@ -3,10 +3,11 @@ import { EMAIL_CONFIG, EmailVerificationEntity, EmailVerificationType, Exception
 import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Response } from 'express';
 import { DateTime } from 'luxon';
 import { createTransport } from 'nodemailer';
 import SMTPTransport from 'nodemailer/lib/smtp-transport';
-import { UpdatePasswordEvent } from 'src/auth/events';
+import { SetTokensEvent, UpdatePasswordEvent } from 'src/auth/events';
 import { DataSource, MoreThan, Repository } from 'typeorm';
 import { v4 } from 'uuid';
 
@@ -130,11 +131,9 @@ export class EmailService {
     const code = this.createCode(type);
     const expiresIn = this.createExpieresIn(5);
     const emailVerification = new EmailVerificationEntity({ userId, type, code, expiresIn });
+    await this.emailVerificationRepository.insert(emailVerification);
 
-    await Promise.all([
-      this.sendEmail(user.email, this.createSignUpEmailContent(code)),
-      this.emailVerificationRepository.insert(emailVerification),
-    ]);
+    this.sendEmail(user.email, this.createSignUpEmailContent(code));
   }
 
   async sendResetPasswordVerificationEmail(email: string) {
@@ -144,15 +143,13 @@ export class EmailService {
       throw new NotFoundException(ExceptionMessage.NotFoundAuth);
     }
 
-    const type = EmailVerificationType.Signup;
+    const type = EmailVerificationType.ResetPassword;
     const code = this.createCode(type);
     const expiresIn = this.createExpieresIn(5);
     const emailVerification = new EmailVerificationEntity({ email, type, code, expiresIn });
+    await this.emailVerificationRepository.insert(emailVerification);
 
-    await Promise.all([
-      this.sendEmail(email, this.createResetPasswordEmailContent(code)),
-      this.emailVerificationRepository.insert(emailVerification),
-    ]);
+    this.sendEmail(email, this.createResetPasswordEmailContent(code));
   }
 
   async verifyEmail(userId: number, command: VerifyEmailCommand) {
@@ -180,7 +177,7 @@ export class EmailService {
     return new UserDto(user);
   }
 
-  async verifyResetPasswordEmail(command: ResetPasswordCommand) {
+  async verifyResetPasswordEmail(res: Response, command: ResetPasswordCommand) {
     const user = await this.userRepository.findOneBy({ email: command.email });
 
     if (user === null) {
@@ -203,6 +200,8 @@ export class EmailService {
       await this.eventPublisher.publish(new UpdatePasswordEvent(user, command.newPassword), { throwError: true });
       await this.emailVerificationRepository.update(emailVerification.id, { verified: true });
     });
+
+    await this.eventPublisher.publish(new SetTokensEvent(res, { id: user.id, email: user.email }));
 
     return new UserDto(user);
   }

@@ -1,6 +1,7 @@
 import { UserDto } from '@common';
-import { Body, Controller, Get, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Patch, Post, Res, UseGuards } from '@nestjs/common';
 import { ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Response } from 'express';
 import { IgnoreJwtGuardError, ReqUser } from 'src/auth/decorators';
 import { JwtAuthGuard } from 'src/auth/guards';
 import { UserTokenPayload } from 'src/auth/interfaces';
@@ -48,7 +49,7 @@ export class EmailController {
   @Patch('verify/reset-password')
   @ApiOperation({ summary: '비밀번호 재설정' })
   @ApiOkResponse({ type: UserDto })
-  async verifyResetPasswordEmail(@Body() command: ResetPasswordCommand) {
-    return this.emailService.verifyResetPasswordEmail(command);
+  async verifyResetPasswordEmail(@Res({ passthrough: true }) res: Response, @Body() command: ResetPasswordCommand) {
+    return this.emailService.verifyResetPasswordEmail(res, command);
   }
 }

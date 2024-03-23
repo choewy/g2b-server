@@ -5,6 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 import { plainToInstance } from 'class-transformer';
+import { Response } from 'express';
 import { DateTime } from 'luxon';
 import { ResetPasswordCommand, VerifyEmailCommand } from 'src/email/commands';
 import { MockRepository } from 'test/utils';
@@ -12,6 +13,7 @@ import { DataSource, EntityManager } from 'typeorm';
 
 import { TestEmailService } from './email.service';
 
+const response = {} as Response;
 const userRepository = new MockRepository(UserEntity);
 const emailVerificationRepository = new MockRepository(EmailVerificationEntity);
 
@@ -233,7 +235,7 @@ describe('EmailService', () => {
       jest.spyOn(userRepository.from(module), 'findOneBy').mockResolvedValue(null);
 
       try {
-        await service.verifyResetPasswordEmail(plainToInstance(ResetPasswordCommand, {}));
+        await service.verifyResetPasswordEmail(response, plainToInstance(ResetPasswordCommand, {}));
       } catch (e) {
         const exception = e as HttpException;
         expect(exception).toBeInstanceOf(NotFoundException);
@@ -247,7 +249,7 @@ describe('EmailService', () => {
       jest.spyOn(emailVerificationRepository.from(module), 'findOneBy').mockResolvedValue(new EmailVerificationEntity());
 
       try {
-        await service.verifyResetPasswordEmail(plainToInstance(ResetPasswordCommand, { newPassword: 'a', confirmPassword: 'b' }));
+        await service.verifyResetPasswordEmail(response, plainToInstance(ResetPasswordCommand, { newPassword: 'a', confirmPassword: 'b' }));
       } catch (e) {
         const exception = e as HttpException;
         expect(exception).toBeInstanceOf(BadRequestException);
@@ -263,11 +265,12 @@ describe('EmailService', () => {
       jest.spyOn(emailVerificationRepository.from(module), 'update').mockResolvedValue(null);
 
       const result = await service.verifyResetPasswordEmail(
+        response,
         plainToInstance(ResetPasswordCommand, { newPassword: 'a', confirmPassword: 'a' }),
       );
 
       expect(result).toBeInstanceOf(UserDto);
-      expect(jest.spyOn(module.get(EventPublisher), 'publish')).toHaveBeenCalledTimes(1);
+      expect(jest.spyOn(module.get(EventPublisher), 'publish')).toHaveBeenCalledTimes(2);
       expect(jest.spyOn(emailVerificationRepository.from(module), 'update')).toHaveBeenCalledTimes(1);
     });
   });
