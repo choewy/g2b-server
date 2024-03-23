@@ -10,7 +10,7 @@ import { KeywordService } from './keyword.service';
 import { GetKeywordQuery, GetKeywordsQuery } from './queries';
 
 @ApiTags('키워드')
-@Controller('keyword')
+@Controller('keywords')
 @UseGuards(JwtAuthGuard)
 export class KeywordController {
   constructor(private readonly keywordService: KeywordService) {}
