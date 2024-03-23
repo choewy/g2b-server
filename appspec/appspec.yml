@@ -1,0 +1,36 @@
+version: 0.0
+
+os: linux
+
+files:
+  - source: /
+    destination: /home/ubuntu/g2b
+    runas: ubuntu
+    overwrite: yes
+
+permissions:
+  - object: /
+    pattern: '**'
+    owner: ubuntu
+    group: ubuntu
+
+hooks:
+  BeforeInstall:
+    - location: before-install.sh
+      timeout: 100
+      runas: ubuntu
+
+  AfterInstall:
+    - location: after-install.sh
+      timeout: 1000
+      runas: ubuntu
+
+  ApplicationStart:
+    - location: start-application.sh
+      timeout: 300
+      runas: ubuntu
+
+  ValidateService:
+    - location: validate-service.sh
+      timeout: 100
+      runas: ubuntu
