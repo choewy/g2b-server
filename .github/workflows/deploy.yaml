@@ -63,7 +63,7 @@ jobs:
       tag: ${{ needs.build.outputs.tag }}
     outputs:
       tag: ${{ needs.build.outputs.tag }}
-      registry: ${{ steps.ecr.outputs.registry }}
+      registry: ${{ steps.push.outputs.registry }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v2
@@ -78,7 +78,8 @@ jobs:
       - id: ecr
         uses: aws-actions/amazon-ecr-login@v1
       - run: echo "${{ secrets.ENVS }}" >> .env
-      - env:
+      - id: push
+        env:
           registry: ${{ steps.ecr.outputs.registry }}
           repository: ${{ secrets.AWS_ECR_REPOSITORY }}
         run: |
