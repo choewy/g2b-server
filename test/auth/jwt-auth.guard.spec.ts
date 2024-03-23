@@ -35,7 +35,7 @@ describe('JwtAuthGuard', () => {
   describe('accessToken 검증', () => {
     it('accessToken 검증이 실패하면 쿠키의 모든 토큰을 삭제하고, UnauthorizedException를 던진다.', async () => {
       jest.spyOn(publisher, 'publish').mockResolvedValueOnce(
-        new EventHandleResultReducer([
+        new EventHandleResultReducer('', [
           {
             context: { getHandler: () => null, getClass: () => null },
             value: {
@@ -61,7 +61,7 @@ describe('JwtAuthGuard', () => {
 
     it('accessToken 검증은 성공하였으나, user 정보가 null이면 쿠키의 모든 토큰을 삭제하고, UnauthorizedException를 던진다.', async () => {
       jest.spyOn(publisher, 'publish').mockResolvedValueOnce(
-        new EventHandleResultReducer([
+        new EventHandleResultReducer('', [
           {
             context: { getHandler: () => null, getClass: () => null },
             value: {
@@ -88,7 +88,7 @@ describe('JwtAuthGuard', () => {
     it('accessToken 검증이 실패(error가 발생하거나, user가 null인 경우)하였으나, IgnoreJwtGuardError가 활성화되어 있으면 true를 반환한다.', () => {
       jest.spyOn(module.get(Reflector), 'getAllAndOverride').mockReturnValue(true);
       jest.spyOn(publisher, 'publish').mockResolvedValueOnce(
-        new EventHandleResultReducer([
+        new EventHandleResultReducer('', [
           {
             context: { getHandler: () => null, getClass: () => null },
             value: {
@@ -107,7 +107,7 @@ describe('JwtAuthGuard', () => {
 
     it('accessToken 검증 성공 시 true를 반환한다.', () => {
       jest.spyOn(publisher, 'publish').mockResolvedValueOnce(
-        new EventHandleResultReducer([
+        new EventHandleResultReducer('', [
           {
             context: { getHandler: () => null, getClass: () => null },
             value: {
@@ -130,7 +130,7 @@ describe('JwtAuthGuard', () => {
       jest
         .spyOn(publisher, 'publish')
         .mockResolvedValueOnce(
-          new EventHandleResultReducer([
+          new EventHandleResultReducer('', [
             {
               context: { getHandler: () => null, getClass: () => null },
               value: {
@@ -143,7 +143,7 @@ describe('JwtAuthGuard', () => {
           ]),
         )
         .mockResolvedValueOnce(
-          new EventHandleResultReducer([
+          new EventHandleResultReducer('', [
             {
               context: { getHandler: () => null, getClass: () => null },
               value: {
@@ -171,7 +171,7 @@ describe('JwtAuthGuard', () => {
       jest
         .spyOn(publisher, 'publish')
         .mockResolvedValueOnce(
-          new EventHandleResultReducer([
+          new EventHandleResultReducer('', [
             {
               context: { getHandler: () => null, getClass: () => null },
               value: {
@@ -184,7 +184,7 @@ describe('JwtAuthGuard', () => {
           ]),
         )
         .mockResolvedValueOnce(
-          new EventHandleResultReducer([
+          new EventHandleResultReducer('', [
             {
               context: { getHandler: () => null, getClass: () => null },
               value: {
@@ -212,7 +212,7 @@ describe('JwtAuthGuard', () => {
       jest
         .spyOn(publisher, 'publish')
         .mockResolvedValueOnce(
-          new EventHandleResultReducer([
+          new EventHandleResultReducer('', [
             {
               context: { getHandler: () => null, getClass: () => null },
               value: {
@@ -225,7 +225,7 @@ describe('JwtAuthGuard', () => {
           ]),
         )
         .mockResolvedValueOnce(
-          new EventHandleResultReducer([
+          new EventHandleResultReducer('', [
             {
               context: { getHandler: () => null, getClass: () => null },
               value: {
@@ -253,7 +253,7 @@ describe('JwtAuthGuard', () => {
       jest
         .spyOn(publisher, 'publish')
         .mockResolvedValueOnce(
-          new EventHandleResultReducer([
+          new EventHandleResultReducer('', [
             {
               context: { getHandler: () => null, getClass: () => null },
               value: {
@@ -266,7 +266,7 @@ describe('JwtAuthGuard', () => {
           ]),
         )
         .mockResolvedValueOnce(
-          new EventHandleResultReducer([
+          new EventHandleResultReducer('', [
             {
               context: { getHandler: () => null, getClass: () => null },
               value: {

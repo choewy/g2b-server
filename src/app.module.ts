@@ -34,7 +34,7 @@ import { SearchModule } from './search/search.module';
         return config.get(TYPEORM_CONFIG);
       },
     }),
-    EventModule.register({ global: true }),
+    EventModule.register({ global: true, debugging: true }),
     AuthModule,
     EmailModule,
     KeywordModule,
