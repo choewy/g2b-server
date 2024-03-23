@@ -2,13 +2,10 @@
 
 source /home/ubuntu/g2b/manifest
 
-container_id=""
-
 if [ "$(sudo docker container inspect --format '{{.Name}}' g2b 2>&1)" == "/g2b" ]; then
   container_id=`sudo docker rm -f g2b`
+  echo "remove container $container_id"
 fi
-
-echo "container_id=$container_id" >> /home/ubuntu/g2b/manifest
 
 image_id="$(sudo docker images --filter=reference=*/$repository:$tag --format "{{.ID}}")"
 
