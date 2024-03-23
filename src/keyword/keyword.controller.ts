@@ -1,59 +1,45 @@
+import { KeywordDto } from '@common';
 import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ReqUser } from 'src/auth/decorators';
+import { JwtAuthGuard } from 'src/auth/guards';
+import { UserTokenPayload } from 'src/auth/interfaces';
 
-import { JwtGuard } from 'src/jwt/jwt.guard';
-import { ReqUserID } from 'src/decorators/req-user-id.param';
-
-import { KeywordByIdDto } from './dto/keyword-by-id.dto';
-import { SetKeywordDto } from './dto/set-keyword.dto';
-import { GetKeywordsQueryHandler } from './queries/handlers/get-keywords.query.handler';
-import { GetKeywordsQuery } from './queries/implements/get-keywords.query';
-import { CreateKeywordCommandHandler } from './commands/handler/create-keyword.command.handler';
-import { CreateKeywordCommand } from './commands/implements/create-keyword.command';
-import { UpdateKeywordCommandHandler } from './commands/handler/update-keyword.command.handler';
-import { UpdateKeywordCommand } from './commands/implements/update-keyword.command';
-import { DeleteKeywordCommandHandler } from './commands/handler/delete-keyword.command.handler';
-import { DeleteKeywordCommand } from './commands/implements/delete-keyword.command';
-import { KeywordDto } from './dto/keyword.dto';
-import { KeywordIdDto } from './dto/keyword-id.dto';
-import { GetKeywordsDto } from './dto/get-keywords.dto';
+import { SetKeywordCommand } from './commands';
+import { KeywordService } from './keyword.service';
+import { GetKeywordQuery, GetKeywordsQuery } from './queries';
 
 @ApiTags('키워드')
-@UseGuards(JwtGuard)
 @Controller('keywords')
+@UseGuards(JwtAuthGuard)
 export class KeywordController {
-  constructor(
-    private readonly getKeywordsQueryHandler: GetKeywordsQueryHandler,
-    private readonly createKeywordCommandHandler: CreateKeywordCommandHandler,
-    private readonly updateKeywordCommandHandler: UpdateKeywordCommandHandler,
-    private readonly deleteKeywordCommandHandler: DeleteKeywordCommandHandler,
-  ) {}
+  constructor(private readonly keywordService: KeywordService) {}
 
   @Get()
-  @ApiOperation({ summary: '키워드 조회' })
+  @ApiOperation({ summary: '키워드 목록 조회' })
   @ApiOkResponse({ type: [KeywordDto] })
-  async getKeywords(@ReqUserID() userId: number, @Query() query: GetKeywordsDto) {
-    return this.getKeywordsQueryHandler.execute(new GetKeywordsQuery(userId, query));
+  async getKeywords(@ReqUser() user: UserTokenPayload, @Query() query: GetKeywordsQuery) {
+    return this.keywordService.getKeywords(user.id, query);
   }
 
   @Post()
-  @ApiOperation({ summary: '키워드 생성' })
-  @ApiCreatedResponse({ type: KeywordDto })
-  async createKeyword(@ReqUserID() userId: number, @Body() body: SetKeywordDto) {
-    return this.createKeywordCommandHandler.execute(new CreateKeywordCommand(userId, body.type, body.text));
+  @ApiOperation({ summary: '키워드 등록' })
+  @ApiCreatedResponse({ type: [KeywordDto] })
+  async createKeyword(@ReqUser() user: UserTokenPayload, @Body() command: SetKeywordCommand) {
+    return this.keywordService.createKeyword(user.id, command);
   }
 
-  @Patch(':id')
+  @Patch(':id(\\d+)')
   @ApiOperation({ summary: '키워드 수정' })
-  @ApiOkResponse({ type: KeywordDto })
-  async updateKeyword(@ReqUserID() userId: number, @Param() param: KeywordByIdDto, @Body() body: SetKeywordDto) {
-    return this.updateKeywordCommandHandler.execute(new UpdateKeywordCommand(userId, param.id, body.type, body.text));
+  @ApiOkResponse({ type: [KeywordDto] })
+  async updateKeyword(@ReqUser() user: UserTokenPayload, @Param() param: GetKeywordQuery, @Body() command: SetKeywordCommand) {
+    return this.keywordService.updateKeyword(user.id, param.id, command);
   }
 
-  @Delete(':id')
+  @Delete(':id(\\d+)')
   @ApiOperation({ summary: '키워드 삭제' })
-  @ApiOkResponse({ type: KeywordIdDto })
-  async deleteKeyword(@ReqUserID() userId: number, @Param() param: KeywordByIdDto) {
-    return this.deleteKeywordCommandHandler.execute(new DeleteKeywordCommand(userId, param.id));
+  @ApiOkResponse({ type: [KeywordDto] })
+  async deleteKeyword(@ReqUser() user: UserTokenPayload, @Param() param: GetKeywordQuery) {
+    return this.keywordService.deleteKeyword(user.id, param.id);
   }
 }

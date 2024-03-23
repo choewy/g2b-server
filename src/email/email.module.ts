@@ -1,26 +1,14 @@
+import { EmailVerificationEntity, UserEntity } from '@common';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { User } from 'src/user/entities/user.entity';
-
+import { EmailEventHandler } from './email-event.handler';
 import { EmailController } from './email.controller';
 import { EmailService } from './email.service';
-import { SignupEmailVerification } from './entities/signup-email-verification.entity';
-import { GetVerifyEmailRemainSecondsQueryHandler } from './queries/handlers/get-verify-email-remain-seconds.query.handler';
-import { SendVerifyEmailCommandHandler } from './commands/handlers/send-verify-email.command.handler';
-import { SendResetPasswordEmailCommandHandler } from './commands/handlers/send-reset-password-email.command.handler';
-import { SendSignupEmailEventHandler } from './events/handlers/send-signup-email.event.handler';
-import { ResetPasswordEmailVerification } from './entities/reset-password-email-verification.entity';
-import { SendVerifyEmailEventHandler } from './events/handlers/send-verify-email.event.handler';
-import { SendResetPasswordEmailEventHandler } from './events/handlers/send-reset-password-email.event.handler';
-
-const QueryHandlers = [GetVerifyEmailRemainSecondsQueryHandler];
-const CommandHandlers = [SendVerifyEmailCommandHandler, SendResetPasswordEmailCommandHandler];
-const EventHandlers = [SendSignupEmailEventHandler, SendVerifyEmailEventHandler, SendResetPasswordEmailEventHandler];
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, SignupEmailVerification, ResetPasswordEmailVerification])],
+  imports: [TypeOrmModule.forFeature([UserEntity, EmailVerificationEntity])],
   controllers: [EmailController],
-  providers: [EmailService, ...QueryHandlers, ...CommandHandlers, ...EventHandlers],
+  providers: [EmailService, EmailEventHandler],
 })
 export class EmailModule {}

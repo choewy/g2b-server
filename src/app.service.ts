@@ -1,12 +1,22 @@
-import { Injectable } from '@nestjs/common';
+import { existsSync, readFileSync } from 'fs';
 
-import { ConfigFactory } from './config/config.factory';
+import { Injectable, OnModuleInit } from '@nestjs/common';
 
 @Injectable()
-export class AppService {
-  constructor(private readonly configFactory: ConfigFactory) {}
+export class AppService implements OnModuleInit {
+  private version: string;
 
-  getVersion(): string {
-    return this.configFactory.version;
+  onModuleInit() {
+    if (existsSync('./package.json') === false) {
+      return;
+    }
+
+    const pkg = readFileSync('./package.json').toString('utf-8');
+
+    this.version = JSON.parse(pkg).version;
+  }
+
+  getVersion() {
+    return { version: this.version ?? null };
   }
 }

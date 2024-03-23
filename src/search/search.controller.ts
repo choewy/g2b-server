@@ -1,55 +1,38 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { SearchDto } from '@common';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
 import { ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ReqUser } from 'src/auth/decorators';
+import { JwtAuthGuard } from 'src/auth/guards';
+import { UserTokenPayload } from 'src/auth/interfaces';
 
-import { JwtGuard } from 'src/jwt/jwt.guard';
-import { ReqUserID } from 'src/decorators/req-user-id.param';
-
-import { SearchStateType } from './entities/enums';
-import { SearchStateDto } from './dto/search-state.dto';
-import { GetSearchStateQueryHandler } from './queries/handlers/get-search-state.query.handler';
-import { GetSearchStateQuery } from './queries/implements/get-search-state.query';
-import { SearchBidsParamsDto } from './dto/search-bids-params.dto';
-import { SearchBidsCommandHandler } from './commands/handlers/seach-bids.command.handler';
-import { SearchBidsCommand } from './commands/implements/search-bids.command';
-import { SearchHrcsParamsDto } from './dto/search-hrcs-params.dto';
-import { SearchHrcsCommandHandler } from './commands/handlers/seach-hrcs.command.handler';
-import { SearchHrcsCommand } from './commands/implements/search-hrcs.command';
+import { StartBidsSearchCommand, StartHrcsSearchCommand } from './commands';
+import { GetSearchQuery } from './queries';
+import { SearchService } from './search.service';
 
 @ApiTags('검색')
-@UseGuards(JwtGuard)
 @Controller('search')
+@UseGuards(JwtAuthGuard)
 export class SearchController {
-  constructor(
-    private readonly getSearchStateQueryHandler: GetSearchStateQueryHandler,
-    private readonly searchBidsCommandHandler: SearchBidsCommandHandler,
-    private readonly searchHrcsCommandHandler: SearchHrcsCommandHandler,
-  ) {}
+  constructor(private readonly searchService: SearchService) {}
 
-  @Get('bids')
-  @ApiOperation({ summary: '입찰공고 검색 상태 조회' })
-  @ApiOkResponse({ type: SearchStateDto })
-  async getBidsSearchState(@ReqUserID() userId: number) {
-    return this.getSearchStateQueryHandler.execute(new GetSearchStateQuery(userId, SearchStateType.Bids));
+  @Get(':type')
+  @ApiOperation({ summary: '진행중인 검색 조회' })
+  @ApiOkResponse({ type: SearchDto })
+  async getSearch(@ReqUser() user: UserTokenPayload, @Param() param: GetSearchQuery) {
+    return this.searchService.getSearch(user.id, param);
   }
 
   @Post('bids')
   @ApiOperation({ summary: '입찰공고 검색 시작' })
-  @ApiCreatedResponse({ type: SearchStateDto })
-  async searchBids(@ReqUserID() userId: number, @Body() body: SearchBidsParamsDto) {
-    return this.searchBidsCommandHandler.execute(new SearchBidsCommand(userId, body));
-  }
-
-  @Get('hrcs')
-  @ApiOperation({ summary: '사전규격 검색 상태 조회' })
-  @ApiOkResponse({ type: SearchStateDto })
-  async getHrcsSearchState(@ReqUserID() userId: number) {
-    return this.getSearchStateQueryHandler.execute(new GetSearchStateQuery(userId, SearchStateType.Bids));
+  @ApiCreatedResponse({ type: SearchDto })
+  async startBidsSearch(@ReqUser() user: UserTokenPayload, @Body() command: StartBidsSearchCommand) {
+    return this.searchService.startBidsSearch(user.id, command);
   }
 
   @Post('hrcs')
   @ApiOperation({ summary: '사전규격 검색 시작' })
-  @ApiCreatedResponse({ type: SearchStateDto })
-  async searchHrcs(@ReqUserID() userId: number, @Body() body: SearchHrcsParamsDto) {
-    return this.searchHrcsCommandHandler.execute(new SearchHrcsCommand(userId, body));
+  @ApiCreatedResponse({ type: SearchDto })
+  async startHrcsSearch(@ReqUser() user: UserTokenPayload, @Body() command: StartHrcsSearchCommand) {
+    return this.searchService.startHrcsSearch(user.id, command);
   }
 }

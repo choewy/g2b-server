@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source /home/ubuntu/g2b/manifest
+
 loop=0
 bootstrap=false
 
@@ -20,6 +22,10 @@ done
 if [ $bootstrap == false ]; then
   echo "fail bootstrap"
 
+  if [ "$container_id" != "" ]; then
+    docker start -d $container_id
+  fi
+  
   exit 1
 fi
 

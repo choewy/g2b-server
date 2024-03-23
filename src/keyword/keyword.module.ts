@@ -1,19 +1,13 @@
+import { KeywordEntity } from '@common';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { Keyword } from './entities/keyword.entity';
 import { KeywordController } from './keyword.controller';
-import { GetKeywordsQueryHandler } from './queries/handlers/get-keywords.query.handler';
-import { CreateKeywordCommandHandler } from './commands/handler/create-keyword.command.handler';
-import { UpdateKeywordCommandHandler } from './commands/handler/update-keyword.command.handler';
-import { DeleteKeywordCommandHandler } from './commands/handler/delete-keyword.command.handler';
-
-const QueryHandlers = [GetKeywordsQueryHandler];
-const CommandHandlers = [CreateKeywordCommandHandler, UpdateKeywordCommandHandler, DeleteKeywordCommandHandler];
+import { KeywordService } from './keyword.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Keyword])],
+  imports: [TypeOrmModule.forFeature([KeywordEntity])],
   controllers: [KeywordController],
-  providers: [...QueryHandlers, ...CommandHandlers],
+  providers: [KeywordService],
 })
 export class KeywordModule {}

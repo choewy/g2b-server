@@ -1,107 +1,117 @@
-name: Deploy
+name: deploy
 
 on:
   push:
-    tags: ['v*']
-    paths-ignore: ['*.md']
-
-env:
-  tag: ${{ github.ref_name }}
-  sha: ${{ github.sha }}
+    branches: ['master']
+    paths: ['package.json']
 
 jobs:
-  build:
+  version:
     runs-on: ubuntu-22.04
-
-    strategy:
-      matrix:
-        node: [20]
-
+    outputs:
+      tag: ${{ steps.version.outputs.tag }}
+      changed: ${{ steps.version.outputs.changed }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
         with:
-          node-version: ${{ matrix.node }}
-
-      - name: Install dependencies
-        run: PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true npm ci
-
-      - name: Build Application
-        run: npm run build
-
-      - name: Create environments
-        env:
-          envs: ${{ secrets.ENVS }}
+          fetch-depth: 2
+      - id: version
         run: |
-          echo "$envs" >> .env
-          echo "VERSION = $tag" >> .env
+          previous=$(git show HEAD^:package.json | grep '"version"' | awk -F '"' '{print $4}')
+          current=$(git show HEAD:package.json | grep '"version"' | awk -F '"' '{print $4}')
+          changed=$( [ "$previous" = "$current" ] && echo "true" || echo "false" )
+          echo "tag=v$current" >> $GITHUB_OUTPUT
+          echo "changed=$changed" >> $GITHUB_OUTPUT
 
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
+  tagging:
+    needs: version
+    runs-on: ubuntu-22.04
+    if: needs.version.outputs.changed == 'true'
+    outputs:
+      tag: ${{ needs.version.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: tag
+        run: |
+          tag=${{ needs.version.outputs.tag }}
+          git tag $tag
+          git push origin $tag
+
+  build:
+    needs: tagging
+    runs-on: ubuntu-22.04
+    outputs:
+      tag: ${{ needs.tagging.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: |
+          PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true 
+          npm ci
+          npm build
+      - uses: actions/upload-artifact@v2
+        with:
+          name: dist
+          path: dist
+
+  push:
+    needs: build
+    runs-on: ubuntu-22.04
+    env:
+      tag: ${{ needs.build.outputs.tag }}
+    outputs:
+      tag: ${{ needs.build.outputs.tag }}
+      registry: ${{ steps.ecr.outputs.registry }}
+    steps:
+      - uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-region: ${{ secrets.AWS_REGION }}
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-
-      - name: Login to AWS ECR
-        id: ecr-login
+      - id: ecr
         uses: aws-actions/amazon-ecr-login@v1
-
-      - name: Build Docker
-        id: docker-build
-        env:
-          registry: ${{ steps.ecr-login.outputs.registry }}
+      - uses: actions/download-artifact@v2
+        with:
+          name: dist
+          path: dist
+      - run: echo "${{ secrets.ENVS }}" >> .env
+      - env:
+          registry: ${{ steps.ecr.outputs.registry }}
           repository: ${{ secrets.AWS_ECR_REPOSITORY }}
         run: |
-          docker build -t $registry/$repository:$tag .
-          docker push $registry/$repository:$tag
+          image=$registry/$repository:$tag
+          docker build -t $image .
+          docker push $image
 
   deploy:
-    needs: build
-
+    needs: push
     runs-on: ubuntu-22.04
-
+    env:
+      sha: ${{ github.sha }}
+      bucket: ${{secrets.AWS_S3_BUCKET }}
+      repository: ${{ secrets.AWS_ECR_REPOSITORY }}
+      registry: ${{ needs.push.outputs.registry }}
+      tag: ${{ needs.push.outputs.tag }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-region: ${{ secrets.AWS_REGION }}
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-
-      - name: Login to AWS ECR
-        id: ecr-login
-        uses: aws-actions/amazon-ecr-login@v1
-
-      - name: Create .profile
-        env:
-          registry: ${{ steps.ecr-login.outputs.registry }}
-          repository: ${{ secrets.AWS_ECR_REPOSITORY }}
-        run: |
-          echo "image=$repository:$tag" >> .profile
-          echo "registry=$registry" >> .profile
-
-      - name: Upload to S3
-        env:
-          bucket: ${{ secrets.AWS_S3_BUCKET }}
-        run: |
-          cp .profile appspec/.profile
+      - run: |
+          echo "tag=$tag" >> manifest
+          echo "registry=$registry" >> manifest
+          echo "repository=$repository" >> manifest
+          cp manifest appspec/manifest
+      - run: |
           aws deploy push \
             --application-name g2b-server \
             --s3-location s3://$bucket/g2b-server-$tag-$sha.zip \
             --source appspec
-
-      - name: Deploy
-        env:
-          bucket: ${{ secrets.AWS_S3_BUCKET }}
-        run: |
-          source .profile
+      - run: |
           aws deploy create-deployment \
             --application-name g2b-server \
             --deployment-group-name product \

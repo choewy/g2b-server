@@ -1,68 +1,61 @@
-import cookie from 'cookie';
-
-import { Namespace, Socket } from 'socket.io';
-import { AsyncApiSub } from 'nestjs-asyncapi';
-
+import { EventPublisher } from '@choewy/nestjs-event';
+import { CookieKey, ExcelDto } from '@common';
 import { OnGatewayConnection, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
+import cookie from 'cookie';
+import { AsyncApiSub } from 'nestjs-asyncapi';
+import { Namespace, Socket } from 'socket.io';
+import { VerifyAccessTokenWithIgnoreExpirationEvent } from 'src/auth/events';
+import { UserTokenVerifyResult } from 'src/auth/interfaces';
+import { OpenApiEndDto, OpenApiItemCountsDto } from 'src/openapi/dtos';
 
-import { JwtService } from 'src/jwt/jwt.service';
-import { JwtKey } from 'src/jwt/enums';
-import { UploadedExcelFileDto } from 'src/file/dto/uploaded-excel-file.dto';
-
-import { SearchStateType } from './entities/enums';
-import { SearchEndDto } from './dto/search-end.dto';
-import { SearchCountDto } from './dto/search-count.dto';
-
-@WebSocketGateway({
-  namespace: 'search',
-  transports: ['websocket'],
-})
+@WebSocketGateway({ namespace: 'search', transports: ['websocket'] })
 export class SearchGateway implements OnGatewayConnection {
   @WebSocketServer()
   private readonly server: Namespace;
 
-  constructor(private readonly jwtService: JwtService) {}
+  constructor(private readonly eventPublisher: EventPublisher) {}
 
   async handleConnection(client: Socket): Promise<void> {
     const cookies = cookie.parse(client.request.headers.cookie);
+    const accessToken = cookies[CookieKey.JwtAccessToken];
+    const accessTokenResults = await this.eventPublisher.publish(new VerifyAccessTokenWithIgnoreExpirationEvent(accessToken));
+    const accessTokenResult = accessTokenResults.getFirstValue() as UserTokenVerifyResult;
 
-    const { error, payload } = this.jwtService.verify(cookies[JwtKey.AccessToken]);
-
-    if (error) {
+    if (accessTokenResult.error || accessTokenResult.user === null) {
       client.disconnect(true);
     } else {
-      await client.join(this.createRoom(payload.id));
+      await client.join(this.createRoom(accessTokenResult.user.id));
     }
   }
 
-  createRoom(userId: number): string {
+  protected createRoom(userId: number): string {
     return ['search', userId].join(':');
   }
 
   @AsyncApiSub({
     tags: [{ name: 'search:${userId}' }],
     channel: 'count',
-    message: { payload: SearchCountDto },
+    message: { payload: OpenApiItemCountsDto },
   })
-  sendCount(userId: number, type: SearchStateType, count: number): void {
-    this.server.in(this.createRoom(userId)).emit('count', new SearchCountDto(type, count));
+  sendSearchCounts(userId: number, counts: OpenApiItemCountsDto) {
+    this.server.in(this.createRoom(userId)).emit('count', counts);
   }
 
   @AsyncApiSub({
     tags: [{ name: 'search:${userId}' }],
-    channel: 'file',
-    message: { payload: UploadedExcelFileDto },
+    channel: 'excel',
+    message: { payload: ExcelDto },
   })
-  sendFile(userId: number, excelFile: UploadedExcelFileDto): void {
-    this.server.in(this.createRoom(userId)).emit('file', excelFile);
+  sendSearchExcel(userId: number, excel: ExcelDto): void {
+    this.server.in(this.createRoom(userId)).emit('excel', excel);
   }
 
   @AsyncApiSub({
     tags: [{ name: 'search:${userId}' }],
     channel: 'end',
-    message: { payload: SearchEndDto },
+    message: { payload: OpenApiEndDto },
   })
-  sendEnd(userId: number, type: SearchStateType, error?: unknown): void {
-    this.server.in(this.createRoom(userId)).emit('end', new SearchEndDto(type, error));
+  sendSearchEnd(userId: number, result: OpenApiEndDto): void {
+    this.server.in(this.createRoom(userId)).emit('end', result);
   }
 }

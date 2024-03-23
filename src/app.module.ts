@@ -1,37 +1,48 @@
+import { EventModule } from '@choewy/nestjs-event';
+import {
+  AwsConfig,
+  EmailConfig,
+  JwtConfig,
+  OpenApiConfig,
+  ServerConfig,
+  SystemConfig,
+  TYPEORM_CONFIG,
+  TypeOrmConfig,
+} from '@common/configs';
 import { Module } from '@nestjs/common';
-import { CqrsModule } from '@nestjs/cqrs';
-
-import { ConfigModule } from './config/config.moduie';
-import { LoggingModule } from './logging/logging.module';
-import { DatabaseModule } from './database/database.module';
-import { JwtModule } from './jwt/jwt.module';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { AppFilter } from './app.filter';
-
-import { HealthModule } from './health/health.module';
-import { FileModule } from './file/file.module';
-import { UserModule } from './user/user.module';
+import { AuthModule } from './auth/auth.module';
 import { EmailModule } from './email/email.module';
+import { ExcelModule } from './excel/excel.module';
 import { KeywordModule } from './keyword/keyword.module';
+import { OpenApiModule } from './openapi/openapi.module';
 import { SearchModule } from './search/search.module';
 
 @Module({
   imports: [
-    CqrsModule.forRoot(),
-    LoggingModule.forRoot(),
-    ConfigModule.forRoot(),
-    DatabaseModule.forRoot(),
-    JwtModule.forRoot(),
-    HealthModule,
-    FileModule,
-    UserModule,
+    ConfigModule.forRoot({
+      isGlobal: true,
+      load: [SystemConfig, ServerConfig, TypeOrmConfig, JwtConfig, AwsConfig, EmailConfig, OpenApiConfig],
+    }),
+    TypeOrmModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory(config: ConfigService) {
+        return config.get(TYPEORM_CONFIG);
+      },
+    }),
+    EventModule.register({ global: true, debugging: true }),
+    AuthModule,
     EmailModule,
     KeywordModule,
     SearchModule,
+    OpenApiModule,
+    ExcelModule,
   ],
   controllers: [AppController],
-  providers: [AppFilter, AppService],
+  providers: [AppService],
 })
 export class AppModule {}

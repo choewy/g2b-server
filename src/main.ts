@@ -1,82 +1,53 @@
+import { createBootstrapOptions } from '@choewy/nestjs-bootstrap/dist/libs';
+import { WinstonLoggerFactory } from '@choewy/nestjs-winston';
+import { NodeEnv, SERVER_CONFIG, ServerOption, SYSTEM_CONFIG, SystemOption } from '@common';
+import { ConfigService } from '@nestjs/config';
+import { NestFactory } from '@nestjs/core';
+import { IoAdapter } from '@nestjs/platform-socket.io';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import cookieParser from 'cookie-parser';
 import { json, urlencoded } from 'express';
 import { AsyncApiDocumentBuilder, AsyncApiModule } from 'nestjs-asyncapi';
 
-import { NestFactory, Reflector } from '@nestjs/core';
-import { BadRequestException, ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
-import { IoAdapter } from '@nestjs/platform-socket.io';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-
-import { ConfigFactory } from './config/config.factory';
 import { AppModule } from './app.module';
-import { AppFilter } from './app.filter';
-import { LoggingInterceptor } from './logging/logging.interceptor';
-import { WinstonLogger } from './logging/logger';
-import { JwtKey } from './jwt/enums';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, { logger: WinstonLogger.create('g2b') });
-  const configFactory = app.get(ConfigFactory);
+  const loggerFactory = new WinstonLoggerFactory({ name: 'g2b' });
+  const logger = loggerFactory.create({ fileLevel: ['verbose', 'warn', 'error'] });
 
-  if (configFactory.isLocal) {
-    const swaggerConfig = new DocumentBuilder()
-      .setTitle('G2B')
-      .setVersion(configFactory.version)
-      .addCookieAuth(JwtKey.AccessToken, {
-        type: 'apiKey',
-        in: 'headers',
-      })
-      .build();
+  const app = await NestFactory.create(AppModule, { logger });
+  const config = app.get(ConfigService);
+  const bootstrapOptions = createBootstrapOptions(app);
+  const systemConfig = config.get<SystemOption>(SYSTEM_CONFIG);
+  const serverConfig = config.get<ServerOption>(SERVER_CONFIG);
 
-    const swaggerDocument = SwaggerModule.createDocument(app, swaggerConfig);
+  if (systemConfig.nodeEnv === NodeEnv.Local) {
+    const swaggerConfig = new DocumentBuilder().setTitle('G2B APIs');
+    const swaggerDocument = SwaggerModule.createDocument(app, swaggerConfig.build());
+    SwaggerModule.setup('/api-docs/swagger', app, swaggerDocument);
 
-    SwaggerModule.setup('/swagger', app, swaggerDocument);
-
-    const asyncapiConfig = new AsyncApiDocumentBuilder()
-      .setTitle('G2B')
-      .setVersion(configFactory.version)
+    const asyncApiConfig = new AsyncApiDocumentBuilder()
+      .setTitle('G2B APIs')
       .setDefaultContentType('application/json')
       .addServer('search', {
         url: 'ws://127.0.0.1:4000/search',
         protocol: 'socket.io',
-      })
-      .build();
-
-    const asyncapiDocument = AsyncApiModule.createDocument(app, asyncapiConfig);
-
-    await AsyncApiModule.setup('/asyncapi', app, asyncapiDocument);
+      });
+    const asyncApiDocument = AsyncApiModule.createDocument(app, asyncApiConfig.build());
+    await AsyncApiModule.setup('/api-docs/async', app, asyncApiDocument);
   }
 
   app.use(json());
   app.use(urlencoded({ extended: true }));
   app.use(cookieParser());
-  app.enableShutdownHooks();
+  app.enableCors(serverConfig.cors);
+  app.useGlobalInterceptors(...bootstrapOptions.interceptors);
+  app.useGlobalPipes(...bootstrapOptions.pipes);
+  app.useGlobalFilters(...bootstrapOptions.filters);
   app.useWebSocketAdapter(new IoAdapter(app));
-  app.enableCors(configFactory.corsOptions);
-  app.useGlobalFilters(app.get(AppFilter));
-  app.useGlobalInterceptors(
-    app.get(LoggingInterceptor),
-    new ClassSerializerInterceptor(new Reflector(), {
-      enableCircularCheck: true,
-      enableImplicitConversion: true,
-    }),
-  );
-  app.useGlobalPipes(
-    new ValidationPipe({
-      transform: true,
-      transformOptions: {
-        enableCircularCheck: true,
-        enableImplicitConversion: true,
-      },
-      stopAtFirstError: true,
-      exceptionFactory: (errors) => {
-        throw new BadRequestException(Object.values(errors.shift()?.constraints)?.pop(), {
-          description: 'Validate Error',
-        });
-      },
-    }),
-  );
+  app.enableShutdownHooks();
 
-  await app.listen(4000);
+  await app.listen(serverConfig.listen.port, serverConfig.listen.host);
 }
+
 bootstrap();

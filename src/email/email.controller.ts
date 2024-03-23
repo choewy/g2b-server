@@ -1,47 +1,55 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { UserDto } from '@common';
+import { Body, Controller, Get, Patch, Post, Res, UseGuards } from '@nestjs/common';
 import { ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Response } from 'express';
+import { IgnoreJwtGuardError, ReqUser } from 'src/auth/decorators';
+import { JwtAuthGuard } from 'src/auth/guards';
+import { UserTokenPayload } from 'src/auth/interfaces';
 
-import { JwtGuard } from 'src/jwt/jwt.guard';
-import { ReqUserID } from 'src/decorators/req-user-id.param';
-import { ReqUserEmail } from 'src/decorators/req-user-email.param';
+import { ResetPasswordCommand, SendResetPasswordEmailCommand, VerifyEmailCommand } from './commands';
+import { EmailService } from './email.service';
 
-import { SendVerifyEmailCommandHandler } from './commands/handlers/send-verify-email.command.handler';
-import { SendVerifyEmailCommand } from './commands/implemenets/send-verify-email.command';
-import { SendResetPasswordEmailCommandHandler } from './commands/handlers/send-reset-password-email.command.handler';
-import { SendResetPasswordEmailDto } from './dto/send-reset-password-email.dto';
-import { SendResetPasswordEmailCommand } from './commands/implemenets/send-reset-password-email.command';
-import { GetVerifyEmailRemainSecondsQueryHandler } from './queries/handlers/get-verify-email-remain-seconds.query.handler';
-import { GetVerifyEmailRemainSecondsQuery } from './queries/events/get-verify-email-remain-seconds.query';
-
-@ApiTags('이메일 발송')
+@ApiTags('이메일')
 @Controller('email')
 export class EmailController {
-  constructor(
-    private readonly getVerifyEmailRemainSecondsQueryHandler: GetVerifyEmailRemainSecondsQueryHandler,
-    private readonly sendVerifyEmailCommandHandler: SendVerifyEmailCommandHandler,
-    private readonly sendResetPasswordEmailCommandHandler: SendResetPasswordEmailCommandHandler,
-  ) {}
+  constructor(private readonly emailService: EmailService) {}
 
-  @Get('verify/seconds')
-  @UseGuards(JwtGuard)
-  @ApiOperation({ summary: '인증 메일 잔여 시간 확인' })
+  @Get('check/signup')
+  @UseGuards(JwtAuthGuard)
+  @IgnoreJwtGuardError()
+  @ApiOperation({ summary: '회원가입 인증 메일 코드 잔여 시간 확인' })
   @ApiOkResponse({ type: Number })
-  async getVerifySeconds(@ReqUserID() userId: number) {
-    return this.getVerifyEmailRemainSecondsQueryHandler.execute(new GetVerifyEmailRemainSecondsQuery(userId));
+  async getEmailExpiresIn(@ReqUser() user: UserTokenPayload) {
+    return this.emailService.getEmailExpiresIn(user.id);
   }
 
-  @Post('verify')
-  @UseGuards(JwtGuard)
-  @ApiOperation({ summary: '인증 메일 발송' })
+  @Post('send/signup')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: '회원가입 인증 메일 발송' })
   @ApiCreatedResponse({ type: null })
-  async sendVerifyEmail(@ReqUserID() userId: number, @ReqUserEmail() email: string) {
-    return this.sendVerifyEmailCommandHandler.execute(new SendVerifyEmailCommand(userId, email));
+  async sendSignUpVerificationEmail(@ReqUser() user: UserTokenPayload) {
+    return this.emailService.sendSignUpVerificationEmail(user.id);
   }
 
-  @Post('reset-password')
-  @ApiOperation({ summary: '비밀번호 초기화 인증 메일 발송' })
+  @Post('send/reset-password')
+  @ApiOperation({ summary: '임시 비밀번호 발급 메일 발송' })
   @ApiCreatedResponse({ type: null })
-  async sendResetPasswordEmail(@Body() body: SendResetPasswordEmailDto) {
-    return this.sendResetPasswordEmailCommandHandler.execute(new SendResetPasswordEmailCommand(body.email));
+  async sendResetPasswordVerificationEmail(@Body() command: SendResetPasswordEmailCommand) {
+    return this.emailService.sendResetPasswordVerificationEmail(command.email);
+  }
+
+  @Patch('verify/signup')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: '이메일 인증' })
+  @ApiOkResponse({ type: UserDto })
+  async verifySignUpEmail(@ReqUser() user: UserTokenPayload, @Body() command: VerifyEmailCommand) {
+    return this.emailService.verifyEmail(user.id, command);
+  }
+
+  @Patch('verify/reset-password')
+  @ApiOperation({ summary: '비밀번호 재설정' })
+  @ApiOkResponse({ type: UserDto })
+  async verifyResetPasswordEmail(@Res({ passthrough: true }) res: Response, @Body() command: ResetPasswordCommand) {
+    return this.emailService.verifyResetPasswordEmail(res, command);
   }
 }
