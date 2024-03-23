@@ -3,6 +3,12 @@
 /node_modules
 /build
 /temp
+/docker/**/log
+/docker/**/logs
+/docker/**/lib
+/docker/**/libs
+/docker/**/disk
+/docker/**/data
 
 # Logs
 logs

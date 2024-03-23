@@ -1,0 +1,24 @@
+version: '3.8'
+
+name: g2b
+
+services:
+  mysql:
+    container_name: mysql
+    build:
+      context: ./mysql
+      dockerfile: dockerfile
+    ports:
+      - 33061:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+    volumes:
+      - ./mysql/log:/var/log/mysql
+      - ./mysql/lib:/var/lib/mysql
+      - ./mysql/disk:/disk
+    networks:
+      - g2b
+
+networks:
+  g2b:
+    driver: bridge
