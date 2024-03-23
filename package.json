@@ -1,6 +1,6 @@
 {
   "name": "g2b-server-renewal",
-  "version": "0.0.1",
+  "version": "1.0.15",
   "description": "",
   "author": "",
   "private": true,
@@ -18,7 +18,10 @@
     "test:watch": "jest --config test/jest.json --watch",
     "test:cov": "jest --config test/jest.json --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config test/jest-e2e.json"
+    "test:e2e": "jest --config test/jest-e2e.json",
+    "version:patch": "npm version patch && source scripts/git-current-branch.sh && git push origin $current_branch",
+    "version:minor": "npm version minor && source scripts/git-current-branch.sh && git push origin $current_branch",
+    "version:major": "npm version major && source scripts/git-current-branch.sh && git push origin $current_branch"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.537.0",
