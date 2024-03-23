@@ -16,6 +16,7 @@ services:
       - ./mysql/log:/var/log/mysql
       - ./mysql/lib:/var/lib/mysql
       - ./mysql/disk:/disk
+    restart: unless-stopped
     networks:
       - g2b
 
