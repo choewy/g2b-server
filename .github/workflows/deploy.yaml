@@ -85,6 +85,7 @@ jobs:
           image=$registry/$repository:$tag
           docker build -t $image .
           docker push $image
+          echo "registry=$registry" >> $GITHUB_OUTPUT
 
   deploy:
     needs: push
