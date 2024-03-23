@@ -63,7 +63,6 @@ jobs:
       tag: ${{ needs.build.outputs.tag }}
     outputs:
       tag: ${{ needs.build.outputs.tag }}
-      registry: ${{ steps.push.outputs.registry }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v2
@@ -77,16 +76,15 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       - id: ecr
         uses: aws-actions/amazon-ecr-login@v1
-      - run: echo "${{ secrets.ENVS }}" >> .env
       - id: push
         env:
           registry: ${{ steps.ecr.outputs.registry }}
           repository: ${{ secrets.AWS_ECR_REPOSITORY }}
         run: |
+          echo "${{ secrets.ENVS }}" >> .env
           image=$registry/$repository:$tag
           docker build -t $image .
           docker push $image
-          echo "registry=$registry" >> $GITHUB_OUTPUT
 
   deploy:
     needs: push
@@ -95,7 +93,6 @@ jobs:
       sha: ${{ github.sha }}
       bucket: ${{secrets.AWS_S3_BUCKET }}
       repository: ${{ secrets.AWS_ECR_REPOSITORY }}
-      registry: ${{ needs.push.outputs.registry }}
       tag: ${{ needs.push.outputs.tag }}
     steps:
       - uses: actions/checkout@v4
@@ -104,7 +101,11 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      - run: |
+      - id: ecr
+        uses: aws-actions/amazon-ecr-login@v1
+      - env:
+          registry: ${{ steps.ecr.outputs.registry }}
+        run: |
           echo "tag=$tag" >> manifest
           echo "registry=$registry" >> manifest
           echo "repository=$repository" >> manifest
