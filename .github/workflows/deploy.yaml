@@ -65,6 +65,11 @@ jobs:
       tag: ${{ needs.build.outputs.tag }}
       registry: ${{ steps.ecr.outputs.registry }}
     steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v2
+        with:
+          name: dist
+          path: dist
       - uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-region: ${{ secrets.AWS_REGION }}
@@ -72,10 +77,6 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       - id: ecr
         uses: aws-actions/amazon-ecr-login@v1
-      - uses: actions/download-artifact@v2
-        with:
-          name: dist
-          path: dist
       - run: echo "${{ secrets.ENVS }}" >> .env
       - env:
           registry: ${{ steps.ecr.outputs.registry }}
