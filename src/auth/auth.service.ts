@@ -55,7 +55,7 @@ export class AuthService {
   setAccessToken(res: Response, id: number, email: string): void {
     res.cookie(CookieKey.JwtAccessToken, this.createAccessToken(id, email), {
       ...this.cookieOptions,
-      expires: DateTime.local().plus({ days: 1 }).toJSDate(),
+      expires: DateTime.local().plus({ days: 14 }).toJSDate(),
     });
   }
 
