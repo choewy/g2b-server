@@ -12,7 +12,7 @@ image_id="$(sudo docker images --filter=reference=*/$repository:$tag --format "{
 sudo docker run \
   --name g2b -d \
   -p 7000:4000 \
-  -v /home/ubuntu/logs:/var/g2b/logs \
+  -v /home/ubuntu/logs:/var/app/logs \
   --network=net \
   --restart=always \
   $image_id
