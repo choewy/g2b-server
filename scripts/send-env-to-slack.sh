@@ -4,6 +4,7 @@ NAME=$1
 URL=$2
 VALUE=$3
 
+VALUE=$(echo "$VALUE" | sed 's/\\//g')
 HEADER="Content-Type: application/json"
 BODY="
   {
