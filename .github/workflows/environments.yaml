@@ -17,9 +17,3 @@ jobs:
       - name: Send to slack
         run: |
           sh scripts/send-env-to-slack.sh "production" "$SLACK_WEBHOOK_URL" "$ENVS"
-
-      - name: Archive artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: environment
-          path: ./payload.json
