@@ -22,6 +22,5 @@ BODY="
   }"
 
 echo "$BODY" >> ./payload.json
-cat ./payload.json
 
 curl -X POST -H "$HEADER" -d "$BODY" "$URL"
