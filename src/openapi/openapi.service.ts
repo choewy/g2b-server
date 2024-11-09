@@ -63,13 +63,8 @@ export class OpenApiService {
   }
 
   protected async getItem<T = OpenApiBidsItem | OpenApiHrcsItem>(type: SearchType, endPoint: OpenApiEndPoint, params: OpenApiParams) {
-    console.log(endPoint);
-
     return lastValueFrom(this.httpService.get<OpenApiResponse<T>>([this.getUrl(type), endPoint.path].join('/'), { params }))
-      .then((res) => {
-        console.log(res.data);
-        return res.data.response.body;
-      })
+      .then((res) => res.data.response.body)
       .catch((e) => {
         throw new OpenApiError(type, e);
       });
@@ -217,8 +212,6 @@ export class OpenApiService {
     } catch (e) {
       result.error = e;
     }
-
-    console.log(result);
 
     await this.eventPublisher.publish(new SendSearchEndEvent(userId, result));
   }
