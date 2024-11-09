@@ -29,11 +29,11 @@ export class OpenApiService {
     switch (type) {
       case SearchType.Bids:
         endPoints = [
-          { name: '물품', path: 'getBidPblancListInfoThngPPSSrch01' },
-          { name: '공사', path: 'getBidPblancListInfoCnstwkPPSSrch01' },
-          { name: '용역', path: 'getBidPblancListInfoServcPPSSrch01' },
-          { name: '외자', path: 'getBidPblancListInfoFrgcptPPSSrch01' },
-          { name: '기타', path: 'getBidPblancListInfoEtcPPSSrch01' },
+          { name: '물품', path: 'getBidPblancListInfoThngPPSSrch02' },
+          { name: '공사', path: 'getBidPblancListInfoCnstwkPPSSrch02' },
+          { name: '용역', path: 'getBidPblancListInfoServcPPSSrch02' },
+          { name: '외자', path: 'getBidPblancListInfoFrgcptPPSSrch02' },
+          { name: '기타', path: 'getBidPblancListInfoEtcPPSSrch02' },
         ];
         break;
 
@@ -63,8 +63,13 @@ export class OpenApiService {
   }
 
   protected async getItem<T = OpenApiBidsItem | OpenApiHrcsItem>(type: SearchType, endPoint: OpenApiEndPoint, params: OpenApiParams) {
+    console.log(endPoint);
+
     return lastValueFrom(this.httpService.get<OpenApiResponse<T>>([this.getUrl(type), endPoint.path].join('/'), { params }))
-      .then((res) => res.data.response.body)
+      .then((res) => {
+        console.log(res.data);
+        return res.data.response.body;
+      })
       .catch((e) => {
         throw new OpenApiError(type, e);
       });
@@ -211,8 +216,10 @@ export class OpenApiService {
       }
     } catch (e) {
       result.error = e;
-    } finally {
-      await this.eventPublisher.publish(new SendSearchEndEvent(userId, result));
     }
+
+    console.log(result);
+
+    await this.eventPublisher.publish(new SendSearchEndEvent(userId, result));
   }
 }
