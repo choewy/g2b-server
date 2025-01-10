@@ -20,24 +20,11 @@ jobs:
           echo "tag=v$current" >> $GITHUB_OUTPUT
           echo "changed=$changed" >> $GITHUB_OUTPUT
 
-  tagging:
+  build:
     needs: version
     runs-on: ubuntu-22.04
     outputs:
       tag: ${{ needs.version.outputs.tag }}
-    steps:
-      - uses: actions/checkout@v4
-      - id: tag
-        run: |
-          tag=${{ needs.version.outputs.tag }}
-          git tag $tag
-          git push origin $tag
-
-  build:
-    needs: tagging
-    runs-on: ubuntu-22.04
-    outputs:
-      tag: ${{ needs.tagging.outputs.tag }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
