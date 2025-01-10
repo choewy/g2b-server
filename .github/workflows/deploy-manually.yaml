@@ -1,11 +1,6 @@
 name: Deploy Manually
 
-on:
-  workflow_dispatch:
-    inputs:
-      tags:
-        required: true
-        type: boolean
+on: workflow_dispatch
 
 jobs:
   version:
@@ -28,7 +23,6 @@ jobs:
   tagging:
     needs: version
     runs-on: ubuntu-22.04
-    if: needs.version.outputs.changed == 'true'
     outputs:
       tag: ${{ needs.version.outputs.tag }}
     steps:
