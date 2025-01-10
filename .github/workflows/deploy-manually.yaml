@@ -1,9 +1,6 @@
-name: Deploy
+name: Deploy Manually
 
-on:
-  push:
-    branches: ['master']
-    paths: ['package.json']
+on: workflow_dispatch
 
 jobs:
   version:
