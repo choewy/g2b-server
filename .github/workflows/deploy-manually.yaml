@@ -1,6 +1,11 @@
 name: Deploy Manually
 
-on: workflow_dispatch
+on:
+  workflow_dispatch:
+    inputs:
+      tags:
+        required: true
+        type: boolean
 
 jobs:
   version:
