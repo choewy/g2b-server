@@ -29,20 +29,20 @@ export class OpenApiService {
     switch (type) {
       case SearchType.Bids:
         endPoints = [
-          { name: '물품', path: 'getBidPblancListInfoThngPPSSrch02' },
-          { name: '공사', path: 'getBidPblancListInfoCnstwkPPSSrch02' },
-          { name: '용역', path: 'getBidPblancListInfoServcPPSSrch02' },
-          { name: '외자', path: 'getBidPblancListInfoFrgcptPPSSrch02' },
-          { name: '기타', path: 'getBidPblancListInfoEtcPPSSrch02' },
+          { name: '물품', path: 'getBidPblancListInfoThng' },
+          { name: '공사', path: 'getBidPblancListInfoCnstwk' },
+          { name: '용역', path: 'getBidPblancListInfoServc' },
+          { name: '외자', path: 'getBidPblancListInfoFrgcpt' },
+          { name: '기타', path: 'getBidPblancListInfoEtc' },
         ];
         break;
 
       case SearchType.Hrcs:
         endPoints = [
-          { name: '물품', path: 'getPublicPrcureThngInfoThngPPSSrch' },
-          { name: '공사', path: 'getPublicPrcureThngInfoCnstwkPPSSrch' },
-          { name: '용역', path: 'getPublicPrcureThngInfoServcPPSSrch' },
-          { name: '외자', path: 'getPublicPrcureThngInfoFrgcptPPSSrch' },
+          { name: '물품', path: 'getPublicPrcureThngInfoThng' },
+          { name: '공사', path: 'getPublicPrcureThngOpinionInfoCnstwk' },
+          { name: '용역', path: 'getPublicPrcureThngOpinionInfoServc' },
+          { name: '외자', path: 'getPublicPrcureThngOpinionInfoFrgcpt' },
         ];
         break;
     }

@@ -88,20 +88,17 @@ export class SearchService {
   }
 
   async deleteSearch(userId: number, type: SearchType, error?: Error) {
-    if (error) {
-      await this.searchRepository.update(
-        { user: { id: userId }, type },
-        {
-          endedAt: new Date(),
-          error: JSON.stringify({
+    const log = await this.searchRepository.findOne({ where: { user: { id: userId }, type }, order: { id: 'DESC' } });
+
+    await this.searchRepository.update(log.id, {
+      endedAt: new Date(),
+      error: error
+        ? JSON.stringify({
             name: error.name,
             message: error.message,
             cause: error.cause,
-          }),
-        },
-      );
-    } else {
-      await this.searchRepository.softDelete({ user: { id: userId }, type });
-    }
+          })
+        : null,
+    });
   }
 }

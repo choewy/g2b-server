@@ -7,7 +7,7 @@ export const OpenApiConfig = registerAs(
   OPEN_API_CONFIG,
   (): OpenApiOption => ({
     apiKey: process.env.OPEN_API_KEY,
-    bidsUrl: `${process.env.OPEN_API_URL}/BidPublicInfoService${process.env.OPEN_API_VERSION}`,
-    hrcsUrl: `${process.env.OPEN_API_URL}/HrcspSsstndrdInfoService`,
+    bidsUrl: `${process.env.OPEN_API_URL}/ad/BidPublicInfoService`,
+    hrcsUrl: `${process.env.OPEN_API_URL}/ao/HrcspSsstndrdInfoService`,
   }),
 );
