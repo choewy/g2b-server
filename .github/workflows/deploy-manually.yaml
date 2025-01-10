@@ -7,7 +7,6 @@ jobs:
     runs-on: ubuntu-22.04
     outputs:
       tag: ${{ steps.version.outputs.tag }}
-      changed: ${{ steps.version.outputs.changed }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -15,9 +14,7 @@ jobs:
       - id: version
         run: |
           current=$(git show HEAD:package.json | grep '"version"' | awk -F '"' '{print $4}')
-          changed=false
           echo "tag=v$current" >> $GITHUB_OUTPUT
-          echo "changed=$changed" >> $GITHUB_OUTPUT
 
   build:
     needs: version
