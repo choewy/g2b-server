@@ -45,7 +45,7 @@ export interface OpenApiResponseBody<T = OpenApiBidsItem | OpenApiHrcsItem> {
 }
 
 export interface OpenApiResponse<T = OpenApiBidsItem | OpenApiHrcsItem> {
-  response: { body: OpenApiResponseBody<T> };
+  body: OpenApiResponseBody<T>;
 }
 
 export interface OpenApiFilterRegExp {
