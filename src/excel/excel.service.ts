@@ -124,7 +124,7 @@ export class ExcelService {
       const row = workSheet.insertRow(i + 2, [
         i + 1,
         item.keywords,
-        Number(item.bfSpecRgstNo),
+        item.bfSpecRgstNo,
         item.bsnsDivNm,
         item.prdctClsfcNoNm,
         item.rlDminsttNm,
