@@ -1,7 +1,7 @@
 import { EventPublisher } from '@choewy/nestjs-event';
 import { KeywordEntity, KeywordType, OPEN_API_CONFIG, OpenApiOption, SearchType } from '@common';
 import { HttpService } from '@nestjs/axios';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { lastValueFrom } from 'rxjs';
@@ -15,8 +15,6 @@ import { OpenApiBidsItem, OpenApiEndPoint, OpenApiFilterRegExp, OpenApiHrcsItem,
 
 @Injectable()
 export class OpenApiService {
-  private readonly logger = new Logger(OpenApiService.name);
-
   constructor(
     private readonly configService: ConfigService,
     private readonly httpService: HttpService,
@@ -64,20 +62,9 @@ export class OpenApiService {
     }
   }
 
-  protected async getItem<T = OpenApiBidsItem | OpenApiHrcsItem>(
-    type: SearchType,
-    endPoint: OpenApiEndPoint,
-    params: OpenApiParams,
-    isDebug: boolean,
-  ) {
+  protected async getItem<T = OpenApiBidsItem | OpenApiHrcsItem>(type: SearchType, endPoint: OpenApiEndPoint, params: OpenApiParams) {
     return lastValueFrom(this.httpService.get<OpenApiResponse<T>>([this.getUrl(type), endPoint.path].join('/'), { params }))
-      .then((res) => {
-        if (isDebug) {
-          this.logger.debug({ type, endPoint, params, response: res.data.response.body });
-        }
-
-        return res.data.response.body;
-      })
+      .then((res) => res.data.response.body)
       .catch((e) => {
         throw new OpenApiError(type, e);
       });
@@ -90,15 +77,12 @@ export class OpenApiService {
 
     let totalCount = 0;
     let currentCount = 0;
-    let isDebug = true;
 
     for (const endPoint of endPoints) {
       const params = new OpenApiParams(config.apiKey, startDate, endDate);
 
       do {
-        const body = await this.getItem<T>(type, endPoint, params, isDebug);
-
-        isDebug = false;
+        const body = await this.getItem<T>(type, endPoint, params);
 
         if (Array.isArray(body.items) === false) {
           break;

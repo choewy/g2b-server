@@ -13,7 +13,7 @@ import { AppModule } from './app.module';
 
 async function bootstrap() {
   const loggerFactory = new WinstonLoggerFactory({ name: 'g2b' });
-  const logger = loggerFactory.create({ fileLevel: ['verbose', 'warn', 'error', 'debug'] });
+  const logger = loggerFactory.create({ fileLevel: ['verbose', 'warn', 'error'] });
 
   const app = await NestFactory.create(AppModule, { logger });
   const config = app.get(ConfigService);
