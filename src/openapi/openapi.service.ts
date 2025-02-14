@@ -39,10 +39,10 @@ export class OpenApiService {
 
       case SearchType.Hrcs:
         endPoints = [
-          { name: '물품', path: 'getPublicPrcureThngInfoThng' },
-          { name: '공사', path: 'getPublicPrcureThngOpinionInfoCnstwk' },
-          { name: '용역', path: 'getPublicPrcureThngOpinionInfoServc' },
-          { name: '외자', path: 'getPublicPrcureThngOpinionInfoFrgcpt' },
+          { name: '물품', path: 'getPublicPrcureThngInfoThngPPSSrch' },
+          { name: '공사', path: 'getPublicPrcureThngOpinionInfoCnstwkPPSSrch' },
+          { name: '용역', path: 'getPublicPrcureThngOpinionInfoServcPPSSrch' },
+          { name: '외자', path: 'getPublicPrcureThngOpinionInfoFrgcptPPSSrch' },
         ];
         break;
     }
