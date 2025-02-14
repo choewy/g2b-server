@@ -29,11 +29,11 @@ export class OpenApiService {
     switch (type) {
       case SearchType.Bids:
         endPoints = [
-          { name: '물품', path: 'getBidPblancListInfoThng' },
-          { name: '공사', path: 'getBidPblancListInfoCnstwk' },
-          { name: '용역', path: 'getBidPblancListInfoServc' },
-          { name: '외자', path: 'getBidPblancListInfoFrgcpt' },
-          { name: '기타', path: 'getBidPblancListInfoEtc' },
+          { name: '물품', path: 'getBidPblancListInfoThngPPSSrch' },
+          { name: '공사', path: 'getBidPblancListInfoCnstwkPPSSrch' },
+          { name: '용역', path: 'getBidPblancListInfoServcPPSSrch' },
+          { name: '외자', path: 'getBidPblancListInfoFrgcptPPSSrch' },
+          { name: '기타', path: 'getBidPblancListInfoEtcPPSSrch' },
         ];
         break;
 
