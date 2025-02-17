@@ -128,10 +128,7 @@ export class OpenApiService {
       }
 
       if (regExp.exclude) {
-        const keywords = []
-          .concat(regExp.exclude.exec(item.bidNtceNm) ?? [])
-          .concat(regExp.exclude.exec(item.ntceInsttNm) ?? [])
-          .concat(regExp.exclude.exec(item.dminsttNm) ?? []);
+        const keywords = [].concat(regExp.exclude.exec(item.ntceInsttNm) ?? []).concat(regExp.exclude.exec(item.dminsttNm) ?? []);
 
         if (keywords.length > 0) {
           continue;
@@ -161,7 +158,7 @@ export class OpenApiService {
       }
 
       if (regExp.exclude) {
-        const keywords = [].concat(regExp.exclude.exec(item.prdctClsfcNoNm) ?? []).concat(regExp.exclude.exec(item.rlDminsttNm) ?? []);
+        const keywords = [].concat(regExp.exclude.exec(item.rlDminsttNm) ?? []);
 
         if (keywords.length > 0) {
           continue;
